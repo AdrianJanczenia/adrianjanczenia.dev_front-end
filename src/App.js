@@ -1,7 +1,13 @@
+import {Outlet} from "react-router-dom";
+import "./App.css";
+import {useState} from "react";
+
 function App() {
-  return (
-    <div>Hello</div>
-  );
+    const [jsonToken, setJsonToken] = useState("");
+
+    return (
+        <Outlet context={{jsonToken, setJsonToken}}/>
+    );
 }
 
 export default App;
