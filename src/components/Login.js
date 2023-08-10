@@ -16,8 +16,10 @@ const Login = () => {
 
         let payload = {
             action: "login",
-            username: username,
-            password: password
+            auth_payload: {
+                username: username,
+                password: password
+            }
         }
 
         const requestOptions = {
@@ -29,19 +31,19 @@ const Login = () => {
             body: JSON.stringify(payload),
         }
 
-        fetch(`${process.env.REACT_APP_BACKEND}/authenticate`, requestOptions)
+        fetch(`${process.env.REACT_APP_BACKEND}/auth`, requestOptions)
             .then((response) => response.json())
             .then((data) => {
                 if (data.error) {
                     // TODO wyswietlic error na stronie
-                    console.log(data.error);
+                    console.log(data.message);
                 } else {
-                    setJsonToken(data.access_token);
+                    setJsonToken(data.data.token);
 
                     // TODO wyswietlic alert na stronie
 
                     // toggleRefresh(true);
-                    navigate("/");
+                    navigate("/home");
                 }
             })
             .catch(error => {

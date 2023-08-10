@@ -6,7 +6,9 @@ const Home = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log(jsonToken)
+        if (jsonToken === "") {
+            navigate("/");
+        }
     }, [jsonToken, navigate])
 
     return (
