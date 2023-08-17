@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate, useOutletContext} from "react-router-dom";
 import "./css/Login.css";
 import Input from "./form/Input";
@@ -7,9 +7,17 @@ const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    const {jsonToken} = useOutletContext();
     const {setJsonToken} = useOutletContext();
+    const {Notification} = useOutletContext();
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (jsonToken !== "") {
+            navigate("/home");
+        }
+    }, [jsonToken, navigate])
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -35,19 +43,24 @@ const Login = () => {
             .then((response) => response.json())
             .then((data) => {
                 if (data.error) {
-                    // TODO wyswietlic error na stronie
-                    console.log(data.message);
+                    Notification.fire({
+                        icon: 'error',
+                        title: data.message,
+                    });
                 } else {
-                    setJsonToken(data.data.token);
+                    Notification.fire({
+                        icon: 'success',
+                        title: 'signed in successfully'
+                    });
 
-                    // TODO wyswietlic alert na stronie
+                    setTimeout(() => {
+                        setJsonToken(data.data.token);
+                        navigate("/home");
+                    }, 2000);
 
-                    // toggleRefresh(true);
-                    navigate("/home");
                 }
             })
             .catch(error => {
-                // TODO wyswietlic error na stronie
                 console.log(error);
             })
     }
