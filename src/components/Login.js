@@ -95,7 +95,7 @@ const Login = () => {
                             />
                         </div>
                         <input className="btn btn-lg btn-light border-white w-100 py-2" type="submit" value="Sign in"/>
-                        <p className="mt-5 mb-3 text-white text-center">&copy; Adrian Janczenia 2023</p>
+                        <p className="mt-5 mb-3 text-white text-center">&copy; Adrian Janczenia 2024</p>
                     </form>
                 </main>
             </div>

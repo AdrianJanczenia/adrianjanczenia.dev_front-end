@@ -43,24 +43,11 @@ function App() {
         showConfirmButton: false,
         timer: 2000,
         timerProgressBar: true,
-        // willOpen: () => {
-        //     setCSSLink();
-        // },
         didOpen: (toast) => {
             toast.addEventListener('mouseenter', Swal.stopTimer)
             toast.addEventListener('mouseleave', Swal.resumeTimer)
         }
     })
-
-    // TODO czy dark theme do alertow?
-    // function setCSSLink() {
-    //     let ss = document.createElement('link');
-    //
-    //     ss.rel = "stylesheet";
-    //     ss.href = "https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css";
-    //
-    //     document.head.appendChild(ss);
-    // }
 
     return (
         <Outlet context={{jsonToken, setJsonToken, Notification}}/>

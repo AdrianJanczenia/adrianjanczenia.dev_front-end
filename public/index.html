@@ -18,13 +18,8 @@
 
 <script>
     {
-        const WS = window.WebSocket;
-        function DevWebSocket(s) {
-            if (s === "wss://adrianjanczenia.dev:3000/ws") {
-                return {};
-            } else {
-                return new WS(s);
-            }
+        function DevWebSocket() {
+            return {};
         }
         window.WebSocket = DevWebSocket;
     }

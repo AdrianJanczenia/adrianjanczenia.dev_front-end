@@ -20,7 +20,5 @@ const router = createBrowserRouter([
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    // <React.StrictMode> // TODO sprawdzic czy leca podwojne requesty refresh na PROD
     <RouterProvider router={router}/>
-    // </React.StrictMode> // TODO
 );
