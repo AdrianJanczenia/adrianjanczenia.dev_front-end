@@ -29,15 +29,15 @@ func Build(cfg *registry.Config) (*App, error) {
 
 	contentFetcherTask := task.NewContentFetcherTask(contentService)
 
-	indexProcess := processIndexPage.NewProcess(contentFetcherTask)
+	indexPageProcess := processIndexPage.NewProcess(contentFetcherTask)
 
-	pageHandler := handlerIndexPage.NewHandler(indexProcess, pageRenderer)
+	indexPageHandler := handlerIndexPage.NewHandler(indexPageProcess, pageRenderer)
 
 	mux := http.NewServeMux()
 	staticFs := http.FileServer(http.Dir("./internal/web/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", staticFs))
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) })
-	mux.HandleFunc("/", pageHandler.HandleIndexPage)
+	mux.HandleFunc("/", indexPageHandler.HandleIndexPage)
 
 	serverAddr := ":" + cfg.Server.Port
 	server := &http.Server{
