@@ -1,0 +1,13 @@
+server:
+  port: "8080"
+  readTimeoutSeconds: 5
+  writeTimeoutSeconds: 10
+
+api:
+  baseUrl: "http://127.0.0.1:8081"
+
+templates:
+  path: "internal/web/template"
+
+cv:
+  password: "local_password"

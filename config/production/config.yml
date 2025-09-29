@@ -1,0 +1,13 @@
+server:
+  port: "8080"
+  readTimeoutSeconds: 5
+  writeTimeoutSeconds: 10
+
+api:
+  baseUrl: "https://domena.pl"
+
+templates:
+  path: "internal/web/template"
+
+cv:
+  password: ""
