@@ -19,7 +19,6 @@ func NewProcess(contentFetcher ContentFetcher) *Process {
 	}
 }
 
-// Execute runs the business logic for the index page.
 func (p *Process) Execute(lang string) (*data.TemplateData, error) {
 	content, err := p.contentFetcher.Fetch(lang)
 	if err != nil {

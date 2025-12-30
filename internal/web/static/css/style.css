@@ -37,7 +37,7 @@ body {
     width: 100%;
 }
 
-/* Desktop Sidebar Styles */
+/* Desktop Sidebar */
 .sidebar {
     width: 280px;
     height: 100vh;
@@ -316,7 +316,7 @@ body {
     visibility: visible;
 }
 
-/* --- Mobile Specific Styles --- */
+/* --- Mobile Styles --- */
 .mobile-header, .mobile-nav-menu, .nav-toggle {
     display: none;
 }
@@ -392,7 +392,7 @@ body {
         transition: transform 0.3s, opacity 0.3s;
     }
 
-    /* Mobile Nav Menu (Off-canvas) */
+    /* Mobile Nav Menu */
     .mobile-nav-menu {
         position: fixed;
         top: 0;
@@ -414,7 +414,7 @@ body {
         transform: translateY(0);
     }
 
-    /* Hamburger animation to 'X' */
+    /* Hamburger animation */
     .nav-toggle:checked ~ .mobile-header .nav-toggle-label span:nth-child(1) {
         transform: rotate(45deg) translate(5px, 5px);
     }
@@ -427,7 +427,7 @@ body {
         transform: rotate(-45deg) translate(5px, -5px);
     }
 
-    /* Mobile menu content styling */
+    /* Mobile menu */
     .mobile-nav-menu .navigation {
         text-align: center;
         margin-bottom: 5rem;
@@ -456,7 +456,6 @@ body {
         gap: 2rem;
     }
 
-    /* Other mobile adjustments */
     .content-header {
         font-size: 1.8rem;
     }

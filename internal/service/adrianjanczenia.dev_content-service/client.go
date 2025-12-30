@@ -4,7 +4,6 @@ import (
 	"net/http"
 )
 
-// Client is responsible for communicating with the external content service API.
 type Client struct {
 	httpClient *http.Client
 	baseURL    string
@@ -17,7 +16,6 @@ func NewClient(httpClient *http.Client, baseURL string) *Client {
 	}
 }
 
-// GetPageContent fetches the page content for a specific language.
 func (c *Client) GetPageContent(lang string) (*PageContent, error) {
 	if lang == "en" {
 		return getEnglishMockData(), nil

@@ -6,7 +6,6 @@ type ContentProvider interface {
 	GetPageContent(lang string) (*adrianjanczenia_dev_content_service.PageContent, error)
 }
 
-// ContentFetcherTask is a task for fetching page content.
 type ContentFetcherTask struct {
 	contentProvider ContentProvider
 }
