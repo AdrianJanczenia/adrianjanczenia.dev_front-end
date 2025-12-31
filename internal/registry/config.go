@@ -72,7 +72,7 @@ func LoadConfig() (*Config, error) {
 	cfg.Cv.Password = yc.Cv.Password
 
 	overrideFromEnv("SERVER_PORT", &cfg.Server.Port)
-	overrideFromEnv("API_BASEURL", &cfg.Api.BaseURL)
+	overrideFromEnv("GATEWAY_URL", &cfg.Api.BaseURL)
 	overrideFromEnv("CV_PASSWORD", &cfg.Cv.Password)
 
 	return cfg, nil

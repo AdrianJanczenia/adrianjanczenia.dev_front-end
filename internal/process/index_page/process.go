@@ -2,11 +2,11 @@ package index_page
 
 import (
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
-	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/adrianjanczenia.dev_content-service"
+	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
 type ContentFetcher interface {
-	Fetch(lang string) (*adrianjanczenia_dev_content_service.PageContent, error)
+	Fetch(lang string) (*gateway_service.PageContent, error)
 }
 
 type Process struct {
@@ -27,7 +27,7 @@ func (p *Process) Execute(lang string) (*data.TemplateData, error) {
 
 	templateData := &data.TemplateData{
 		Lang:    lang,
-		Content: *content,
+		Content: content,
 	}
 
 	return templateData, nil

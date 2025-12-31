@@ -1,6 +1,7 @@
 package renderer
 
 import (
+	"bytes"
 	"html/template"
 	"log"
 	"net/http"
@@ -37,6 +38,9 @@ func New(templatesPath string) Renderer {
 	errorTmpl := filepath.Join(templatesPath, "error.html")
 	r.templates["error"] = template.Must(template.New("error.html").Funcs(funcs).ParseFiles(errorTmpl))
 
+	cvErrorTmpl := filepath.Join(templatesPath, "cv_error.html")
+	r.templates["cv_error"] = template.Must(template.New("cv_error.html").Funcs(funcs).ParseFiles(cvErrorTmpl))
+
 	return r
 }
 
@@ -51,15 +55,31 @@ func (r *templateRenderer) Render(w http.ResponseWriter, name string, data any) 
 	executeTmpl := "base"
 	if name == "error" {
 		executeTmpl = "error.html"
+	} else if name == "cv_error" {
+		executeTmpl = "cv_error.html"
 	}
 
-	if err := tmpl.ExecuteTemplate(w, executeTmpl, data); err != nil {
+	buf := new(bytes.Buffer)
+	if err := tmpl.ExecuteTemplate(buf, executeTmpl, data); err != nil {
+		log.Printf("ERROR: could not execute template %s: %v", name, err)
+
 		if name == "error" {
-			log.Printf("CRITICAL: failed to execute error template: %v", err)
-			http.Error(w, "a critical error occurred while rendering the error page.", http.StatusInternalServerError)
+			http.Error(w, "Critical error rendering error page", http.StatusInternalServerError)
 			return
 		}
-		log.Printf("ERROR: could not execute template %s: %v", name, err)
-		r.Render(w, "error", data)
+
+		errorData := struct {
+			Lang    string
+			Title   string
+			Message string
+		}{
+			Lang:    "en",
+			Title:   "Rendering Error",
+			Message: "A critical error occurred while rendering the page.",
+		}
+		r.Render(w, "error", errorData)
+		return
 	}
+
+	buf.WriteTo(w)
 }

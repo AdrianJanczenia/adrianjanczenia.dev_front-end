@@ -1,8 +1,8 @@
 package data
 
-import "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/adrianjanczenia.dev_content-service"
+import "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 
 type TemplateData struct {
 	Lang    string
-	Content adrianjanczenia_dev_content_service.PageContent
+	Content *gateway_service.PageContent
 }

@@ -1,30 +1,16 @@
 {{define "content"}}
 <section id="about" class="content-section">
-    <h2 class="content-header"><span>GET</span> /{{.Content.Translations.HeaderAbout}}</h2>
+    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_about"}}</h2>
     <div class="styled-block">
-        <p><span class="key">{{.Content.Translations.ProfileKeyName}}:</span> <span class="string">"{{.Content.Profile.Name}}"</span>
-        </p>
-        <p><span class="key">{{.Content.Translations.ProfileKeyRole}}:</span> <span class="string">"{{.Content.Profile.Role}}"</span>
-        </p>
-        <p><span class="key">{{.Content.Translations.ProfileKeyStatus}}:</span> <span class="string">"{{.Content.Profile.Status}}"</span>
-        </p><br>
-        <p><span class="key">{{.Content.Translations.ProfileKeyBio}}:</span> |<span class="multiline-text">{{.Content.Profile.Bio}}</span>
-        </p>
-    </div>
-</section>
-
-<section id="skills" class="content-section">
-    <h2 class="content-header"><span>GET</span> /{{.Content.Translations.HeaderSkills}}</h2>
-    <div class="styled-block">
-        {{range .Content.Skills}}
-        <p><span class="key">{{.Key}}:</span> <span class="bracket">[</span><span class="string">{{join .Values}}</span><span
-                class="bracket">]</span></p>
-        {{end}}
+        <p><span class="key">{{index .Content.Translations "profile_key_name"}}:</span> <span class="string">"{{.Content.Profile.Name}}"</span></p>
+        <p><span class="key">{{index .Content.Translations "profile_key_headline"}}:</span> <span class="string">"{{.Content.Profile.Headline}}"</span></p>
+        <br>
+        <p><span class="key">{{index .Content.Translations "profile_key_about"}}:</span> |<span class="multiline-text">{{.Content.Profile.About}}</span></p>
     </div>
 </section>
 
 <section id="experience" class="content-section">
-    <h2 class="content-header"><span>GET</span> /{{.Content.Translations.HeaderExperience}}</h2>
+    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_experience"}}</h2>
     <div class="styled-block">
         {{range .Content.Experience}}
         <div class="experience-item">
@@ -33,30 +19,55 @@
                 <p>{{.Period}}</p>
             </div>
             <div class="experience-description">
-                <p>{{.Description}}</p>
+                <p><span class="key">location:</span> <span class="string">"{{.Location}} | {{.Type}}"</span></p>
+                <br>
+                <p class="string">"{{.Summary}}"</p>
+                <br>
+                <p><span class="key">{{index $.Content.Translations "experience_key_responsibilities"}}:</span> <span class="bracket">[</span></p>
+                {{range .Responsibilities}}
+                <p class="array-item"><span class="string">"{{.}}"</span>,</p>
+                {{end}}
+                <p><span class="bracket">]</span></p>
+                <br>
+                <p><span class="key">{{index $.Content.Translations "experience_key_stack"}}:</span> <span class="bracket">[</span><span class="string">{{join .SkillsUsed}}</span><span class="bracket">]</span></p>
             </div>
         </div>
         {{end}}
     </div>
 </section>
 
+<section id="skills" class="content-section">
+    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_skills"}}</h2>
+    <div class="styled-block">
+        {{range .Content.Skills}}
+        <p><span class="key">{{.Key}}:</span> <span class="bracket">[</span><span class="string">{{join .Values}}</span><span class="bracket">]</span></p>
+        {{end}}
+    </div>
+</section>
+
+<section id="languages" class="content-section">
+    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_languages"}}</h2>
+    <div class="styled-block">
+        {{range .Content.Languages}}
+        <p><span class="key">{{.Language}}:</span> <span class="string">"{{.Proficiency}}"</span></p>
+        {{end}}
+    </div>
+</section>
+
 <section id="contact" class="content-section">
-    <h2 class="content-header"><span>GET</span> /{{.Content.Translations.HeaderContact}}</h2>
+    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_contact"}}</h2>
     <ul class="contact-list">
+        <li>
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+            </svg>
+            <div><span class="key">{{index .Content.Translations "contact_key_linkedin"}}:</span> <a href="https://linkedin.com/in/{{.Content.Contact.Linkedin}}" target="_blank">"/in/{{.Content.Contact.Linkedin}}"</a></div>
+        </li>
         <li>
             <svg class="icon" viewBox="0 0 24 24">
                 <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"></path>
             </svg>
-            <div><span class="key">{{.Content.Translations.ContactKeyEmail}}:</span> <a
-                    href="mailto:{{.Content.Contact.Email}}">"{{.Content.Contact.Email}}"</a></div>
-        </li>
-        <li>
-            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title>
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 0 1 2.063-2.065 2.064 2.064 0 0 1 2.063 2.065c0 1.14-.925 2.065-2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/>
-            </svg>
-            <div><span class="key">{{.Content.Translations.ContactKeyLinkedIn}}:</span> <a
-                    href="https://linkedin.com/in/{{.Content.Contact.LinkedIn}}" target="_blank">"/in/{{.Content.Contact.LinkedIn}}"</a>
-            </div>
+            <div><span class="key">{{index .Content.Translations "contact_key_email"}}:</span> <a href="mailto:{{.Content.Contact.Email}}">"{{.Content.Contact.Email}}"</a></div>
         </li>
     </ul>
 </section>

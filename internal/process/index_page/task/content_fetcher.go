@@ -1,9 +1,9 @@
 package task
 
-import "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/adrianjanczenia.dev_content-service"
+import "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 
 type ContentProvider interface {
-	GetPageContent(lang string) (*adrianjanczenia_dev_content_service.PageContent, error)
+	GetPageContent(lang string) (*gateway_service.PageContent, error)
 }
 
 type ContentFetcherTask struct {
@@ -16,6 +16,6 @@ func NewContentFetcherTask(contentProvider ContentProvider) *ContentFetcherTask 
 	}
 }
 
-func (t *ContentFetcherTask) Fetch(lang string) (*adrianjanczenia_dev_content_service.PageContent, error) {
+func (t *ContentFetcherTask) Fetch(lang string) (*gateway_service.PageContent, error) {
 	return t.contentProvider.GetPageContent(lang)
 }

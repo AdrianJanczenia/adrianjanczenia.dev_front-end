@@ -9,12 +9,18 @@ import (
 	"syscall"
 	"time"
 
+	handlerDownloadCV "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/download_cv"
+	handlerGetCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/get_cv_link"
 	handlerIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/index_page"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
+	processDownloadCV "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/download_cv"
+	taskDownloadCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/download_cv/task"
+	processGetCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_cv_link"
+	taskRequestCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_cv_link/task"
 	processIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/index_page"
-	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/index_page/task"
+	taskIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/index_page/task"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/registry"
-	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/adrianjanczenia.dev_content-service"
+	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
 type App struct {
@@ -25,19 +31,28 @@ func Build(cfg *registry.Config) (*App, error) {
 	pageRenderer := renderer.New(cfg.Templates.Path)
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
-	contentService := adrianjanczenia_dev_content_service.NewClient(httpClient, cfg.Api.BaseURL)
+	gatewayService := gateway_service.NewClient(httpClient, cfg.Api.BaseURL)
 
-	contentFetcherTask := task.NewContentFetcherTask(contentService)
-
+	contentFetcherTask := taskIndexPage.NewContentFetcherTask(gatewayService)
 	indexPageProcess := processIndexPage.NewProcess(contentFetcherTask)
-
 	indexPageHandler := handlerIndexPage.NewHandler(indexPageProcess, pageRenderer)
+
+	requestCVLinkTask := taskRequestCVLink.NewRequestCVLinkTask(gatewayService)
+	getCVLinkProcess := processGetCVLink.NewProcess(requestCVLinkTask)
+	getCVLinkHandler := handlerGetCVLink.NewHandler(getCVLinkProcess)
+
+	validateCVLinkTask := taskDownloadCVLink.NewValidateLinkTask()
+	streamCVLinkTask := taskDownloadCVLink.NewFetchPDFStreamTask(gatewayService)
+	downloadCVProcess := processDownloadCV.NewProcess(validateCVLinkTask, streamCVLinkTask)
+	downloadCVHandler := handlerDownloadCV.NewHandler(downloadCVProcess, gatewayService, pageRenderer)
 
 	mux := http.NewServeMux()
 	staticFs := http.FileServer(http.Dir("./internal/web/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", staticFs))
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) })
 	mux.HandleFunc("/", indexPageHandler.HandleIndexPage)
+	mux.HandleFunc("/api/cv-link", getCVLinkHandler.HandleCVRequest)
+	mux.HandleFunc("/api/cv-download", downloadCVHandler.HandleDownload)
 
 	serverAddr := ":" + cfg.Server.Port
 	server := &http.Server{

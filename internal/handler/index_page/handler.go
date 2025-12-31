@@ -47,9 +47,9 @@ func (h *Handler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
 			Message: "Something went wrong. Please try again later.",
 		}
 
-		if templateData != nil && templateData.Content.Translations.ErrorTitle != "" {
-			errorData.Title = templateData.Content.Translations.ErrorTitle
-			errorData.Message = templateData.Content.Translations.ErrorMessage
+		if templateData != nil && templateData.Content != nil && templateData.Content.Translations["error_title"] != "" {
+			errorData.Title = templateData.Content.Translations["error_title"]
+			errorData.Message = templateData.Content.Translations["error_message"]
 		}
 
 		h.renderer.Render(w, "error", errorData)

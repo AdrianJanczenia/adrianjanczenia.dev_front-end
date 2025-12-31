@@ -4,7 +4,7 @@ server:
   writeTimeoutSeconds: 10
 
 api:
-  baseUrl: "http://127.0.0.1:8081"
+  baseUrl: ""
 
 templates:
   path: "internal/web/template"

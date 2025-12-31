@@ -6,28 +6,28 @@ import (
 	"testing"
 
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
-	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/adrianjanczenia.dev_content-service"
+	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
 type mockContentFetcher struct {
-	retContent *adrianjanczenia_dev_content_service.PageContent
+	retContent *gateway_service.PageContent
 	retErr     error
 }
 
-func (m *mockContentFetcher) Fetch(lang string) (*adrianjanczenia_dev_content_service.PageContent, error) {
+func (m *mockContentFetcher) Fetch(lang string) (*gateway_service.PageContent, error) {
 	return m.retContent, m.retErr
 }
 
 func TestProcess_Execute(t *testing.T) {
-	mockContent := &adrianjanczenia_dev_content_service.PageContent{
-		Profile: adrianjanczenia_dev_content_service.Profile{Name: "Test Name"},
+	mockContent := &gateway_service.PageContent{
+		Profile: gateway_service.Profile{Name: "Test Name"},
 	}
 	mockError := errors.New("task failed")
 
 	testCases := []struct {
 		name              string
 		lang              string
-		mockFetcherResult *adrianjanczenia_dev_content_service.PageContent
+		mockFetcherResult *gateway_service.PageContent
 		mockFetcherError  error
 		expectedResult    *data.TemplateData
 		expectedError     error
