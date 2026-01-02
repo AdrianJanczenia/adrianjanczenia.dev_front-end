@@ -1,13 +1,14 @@
 package gateway_service
 
 type PageContent struct {
-	Meta         Meta              `json:"meta"`
-	Profile      Profile           `json:"profile"`
-	Skills       []SkillGroup      `json:"skills"`
-	Experience   []Job             `json:"experience"`
-	Languages    []Language        `json:"languages"`
-	Contact      Contact           `json:"contact"`
-	Translations map[string]string `json:"translations"`
+	Meta          Meta              `json:"meta"`
+	Profile       Profile           `json:"profile"`
+	Skills        []SkillGroup      `json:"skills"`
+	Experience    []Job             `json:"experience"`
+	Languages     []Language        `json:"languages"`
+	Contact       Contact           `json:"contact"`
+	PrivacyPolicy PrivacyPolicy     `json:"privacy_policy"`
+	Translations  map[string]string `json:"translations"`
 }
 
 type Meta struct {
@@ -47,4 +48,19 @@ type Contact struct {
 	Email    string `json:"email"`
 	Linkedin string `json:"linkedin"`
 	Github   string `json:"github"`
+}
+
+type PrivacyPolicy struct {
+	Title    string           `json:"title"`
+	Sections []PrivacySection `json:"sections"`
+}
+
+type PrivacySection struct {
+	Header string        `json:"header"`
+	Items  []PrivacyItem `json:"items"`
+}
+
+type PrivacyItem struct {
+	Label string `json:"label"`
+	Text  string `json:"text"`
 }

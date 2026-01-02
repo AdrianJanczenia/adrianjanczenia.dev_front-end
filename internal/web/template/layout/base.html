@@ -2,198 +2,25 @@
 <!DOCTYPE html>
 <html lang="{{.Lang}}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
-    <title>{{.Content.Meta.Title}}</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+    {{template "head" .}}
 </head>
 <body id="top">
 
-<input type="checkbox" id="nav-toggle" class="nav-toggle">
-
-<header class="mobile-header">
-    <div class="brand-container">
-        <a href="#top" class="brand">{{.Content.Profile.Name}}</a>
-        <p class="mobile-subtitle">{{.Content.Profile.Headline}}</p>
-    </div>
-    <label for="nav-toggle" class="nav-toggle-label">
-        <span></span>
-        <span></span>
-        <span></span>
-    </label>
-</header>
-
-<div class="mobile-nav-menu">
-    <nav>
-        <ul class="navigation">
-            <li><a href="#about">/{{index .Content.Translations "nav_about"}}</a></li>
-            <li><a href="#experience">/{{index .Content.Translations "nav_experience"}}</a></li>
-            <li><a href="#skills">/{{index .Content.Translations "nav_skills"}}</a></li>
-            <li><a href="#languages">/{{index .Content.Translations "nav_languages"}}</a></li>
-            <li><a href="#contact">/{{index .Content.Translations "nav_contact"}}</a></li>
-            <li><a href="#" class="cv-link">/{{index .Content.Translations "nav_cv"}}</a></li>
-        </ul>
-    </nav>
-    <div class="mobile-footer">
-        <div class="footer-links">
-            <a href="https://github.com/{{.Content.Contact.Github}}" target="_blank" aria-label="GitHub">
-                <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297 24 5.67 18.627.297 12 .297z"/></svg>
-            </a>
-            <a href="https://linkedin.com/in/{{.Content.Contact.Linkedin}}" target="_blank" aria-label="LinkedIn">
-                <svg role="img" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-            </a>
-            <a href="mailto:{{.Content.Contact.Email}}" aria-label="Email">
-                <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"></path></svg>
-            </a>
-        </div>
-        <div class="lang-switcher">
-            <a href="/?lang=pl" {{if eq .Lang "pl"}}class="active"{{end}}>🇵🇱</a>
-            <a href="/?lang=en" {{if eq .Lang "en"}}class="active"{{end}}>🇬🇧</a>
-        </div>
-    </div>
-</div>
+{{template "mobile_nav" .}}
 
 <div class="container">
-    <aside class="sidebar">
-        <div>
-            <div class="profile">
-                <h1>{{.Content.Profile.Name}}</h1>
-                <p>{{.Content.Profile.Headline}}</p>
-            </div>
-            <nav>
-                <ul class="navigation">
-                    <li><a href="#about">/{{index .Content.Translations "nav_about"}}</a></li>
-                    <li><a href="#experience">/{{index .Content.Translations "nav_experience"}}</a></li>
-                    <li><a href="#skills">/{{index .Content.Translations "nav_skills"}}</a></li>
-                    <li><a href="#languages">/{{index .Content.Translations "nav_languages"}}</a></li>
-                    <li><a href="#contact">/{{index .Content.Translations "nav_contact"}}</a></li>
-                    <li><a href="#" class="cv-link">/{{index .Content.Translations "nav_cv"}}</a></li>
-                </ul>
-            </nav>
-        </div>
-        <div class="sidebar-footer">
-            <div class="footer-links">
-                <a href="https://github.com/{{.Content.Contact.Github}}" target="_blank" aria-label="GitHub">
-                    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297 24 5.67 18.627.297 12 .297z"/></svg>
-                </a>
-                <a href="https://linkedin.com/in/{{.Content.Contact.Linkedin}}" target="_blank" aria-label="LinkedIn">
-                    <svg role="img" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                </a>
-                <a href="mailto:{{.Content.Contact.Email}}" aria-label="Email">
-                    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"></path></svg>
-                </a>
-            </div>
-            <div class="lang-switcher">
-                <a href="/?lang=pl" {{if eq .Lang "pl"}}class="active"{{end}}>🇵🇱</a>
-                <a href="/?lang=en" {{if eq .Lang "en"}}class="active"{{end}}>🇬🇧</a>
-            </div>
-        </div>
-    </aside>
-
+    {{template "sidebar" .}}
     <main class="main-content">
         {{template "content" .}}
     </main>
 </div>
 
-<div id="cv-modal" class="modal-overlay">
-    <div class="modal-window">
-        <button class="modal-close" aria-label="Close">&times;</button>
-        <h3 class="modal-header">{{index .Content.Translations "cv_modal_title"}}</h3>
-        <form class="modal-form" id="cv-form">
-            <input type="password" id="cv-password" class="modal-input" placeholder="{{index .Content.Translations `cv_password_placeholder`}}" required>
-            <button type="submit" class="modal-btn">
-                <span class="btn-text">{{index .Content.Translations "btn_get_link"}}</span>
-                <span class="spinner"></span>
-            </button>
-            <div class="modal-error" id="modal-error"></div>
-        </form>
-    </div>
-</div>
+{{template "cv_modal" .}}
 
-<a href="#top" class="back-to-top" aria-label="{{index .Content.Translations "back_to_top_label"}}">&#8593;</a>
+<a href="#top" class="back-to-top" aria-label="{{if .Content}}{{index .Content.Translations "back_to_top_label"}}{{else}}Back to top{{end}}">&#8593;</a>
 
-<script>
-    const backToTopButton = document.querySelector('.back-to-top');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 100) {
-            backToTopButton.classList.add('visible');
-        } else {
-            backToTopButton.classList.remove('visible');
-        }
-    });
+{{template "scripts" .}}
 
-    document.querySelectorAll('.mobile-nav-menu a').forEach(item => {
-        item.addEventListener('click', () => {
-            setTimeout(() => {
-                document.getElementById('nav-toggle').checked = false;
-            }, 100);
-        });
-    });
-
-    const modal = document.getElementById('cv-modal');
-    const cvForm = document.getElementById('cv-form');
-    const submitBtn = modal.querySelector('.modal-btn');
-    const errorMsg = document.getElementById('modal-error');
-    const passInput = document.getElementById('cv-password');
-
-    document.querySelectorAll('.cv-link').forEach(link => {
-        link.onclick = (e) => {
-            e.preventDefault();
-            modal.classList.add('open');
-            errorMsg.style.display = 'none';
-            passInput.value = '';
-            passInput.focus();
-        };
-    });
-
-    document.querySelector('.modal-close').onclick = () => modal.classList.remove('open');
-    window.onclick = (e) => { if (e.target === modal) modal.classList.remove('open'); };
-
-    cvForm.onsubmit = async (e) => {
-        e.preventDefault();
-        const pass = passInput.value;
-        const lang = document.documentElement.lang;
-
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
-        errorMsg.style.display = 'none';
-
-        try {
-            const res = await fetch(`/api/cv-link?password=${encodeURIComponent(pass)}&lang=${lang}`);
-
-            if (res.status === 401) {
-                throw new Error("{{index .Content.Translations `error_cv_auth` }}");
-            }
-            if (!res.ok) {
-                throw new Error("Server error. Please try again.");
-            }
-
-            const data = await res.json();
-
-            if (!data.url) {
-                throw new Error("Invalid response from server.");
-            }
-
-            const urlObj = new URL(data.url, window.location.origin);
-            const token = urlObj.searchParams.get('token');
-            const cvLang = urlObj.searchParams.get('lang');
-
-            const proxyUrl = `/api/cv-download?token=${token}&lang=${cvLang || lang}`;
-
-            window.open(proxyUrl, '_blank');
-            modal.classList.remove('open');
-
-        } catch (err) {
-            errorMsg.textContent = err.message;
-            errorMsg.style.display = 'block';
-        } finally {
-            submitBtn.classList.remove('loading');
-            submitBtn.disabled = false;
-        }
-    };
-</script>
 </body>
 </html>
 {{end}}

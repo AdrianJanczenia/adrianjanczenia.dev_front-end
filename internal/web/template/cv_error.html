@@ -9,13 +9,11 @@
 <body class="error-centered-body">
 <div class="error-centered-container">
     <h2 class="content-header"><span>ERROR::</span>CV_SESSION_EXPIRED</h2>
-
     <div class="styled-block">
         <span class="key">status</span>: <span class="string">"FAILED"</span>,
         <br>
         <span class="key">message</span>: <span class="string">"{{.ErrorMessage}}"</span>
     </div>
-
     <div class="error-actions">
         <a href="/?lang={{.Lang}}" class="modal-btn">
             {{index .Content.Translations "btn_back"}}

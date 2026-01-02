@@ -1,0 +1,16 @@
+{{define "cv_modal"}}
+<div id="cv-modal" class="modal-overlay">
+    <div class="modal-window">
+        <button class="modal-close" aria-label="Close">&times;</button>
+        <h3 class="modal-header">{{index .Content.Translations "cv_modal_title"}}</h3>
+        <form class="modal-form" id="cv-form">
+            <input type="password" id="cv-password" class="modal-input" placeholder="{{index .Content.Translations `cv_password_placeholder`}}" required>
+            <button type="submit" class="modal-btn">
+                <span class="btn-text">{{index .Content.Translations "btn_get_link"}}</span>
+                <span class="spinner"></span>
+            </button>
+            <div class="modal-error" id="modal-error"></div>
+        </form>
+    </div>
+</div>
+{{end}}

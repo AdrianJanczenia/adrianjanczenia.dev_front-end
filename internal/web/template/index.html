@@ -29,7 +29,7 @@
                 {{end}}
                 <p><span class="bracket">]</span></p>
                 <br>
-                <p><span class="key">{{index $.Content.Translations "experience_key_stack"}}:</span> <span class="bracket">[</span><span class="string">{{join .SkillsUsed}}</span><span class="bracket">]</span></p>
+                <p><span class="key">{{index $.Content.Translations "experience_key_stack"}}:</span> <span class="bracket">[ </span><span class="string">{{join .SkillsUsed}}</span><span class="bracket"> ]</span></p>
             </div>
         </div>
         {{end}}
@@ -40,7 +40,7 @@
     <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_skills"}}</h2>
     <div class="styled-block">
         {{range .Content.Skills}}
-        <p><span class="key">{{.Key}}:</span> <span class="bracket">[</span><span class="string">{{join .Values}}</span><span class="bracket">]</span></p>
+        <p><span class="key">{{.Key}}:</span> <span class="bracket">[ </span><span class="string">{{join .Values}}</span><span class="bracket"> ]</span></p>
         {{end}}
     </div>
 </section>

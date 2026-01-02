@@ -12,6 +12,7 @@ import (
 	handlerDownloadCV "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/download_cv"
 	handlerGetCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/get_cv_link"
 	handlerIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/index_page"
+	handlerPrivacyPolicy "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/privacy_policy"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
 	processDownloadCV "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/download_cv"
 	taskDownloadCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/download_cv/task"
@@ -19,6 +20,8 @@ import (
 	taskRequestCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_cv_link/task"
 	processIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/index_page"
 	taskIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/index_page/task"
+	processPrivacyPolicy "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/privacy_policy"
+	taskPrivacyPolicy "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/privacy_policy/task"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/registry"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
@@ -37,6 +40,10 @@ func Build(cfg *registry.Config) (*App, error) {
 	indexPageProcess := processIndexPage.NewProcess(contentFetcherTask)
 	indexPageHandler := handlerIndexPage.NewHandler(indexPageProcess, pageRenderer)
 
+	privacyFetcherTask := taskPrivacyPolicy.NewFetchPrivacyContentTask(gatewayService)
+	privacyProcess := processPrivacyPolicy.NewProcess(privacyFetcherTask)
+	privacyHandler := handlerPrivacyPolicy.NewHandler(privacyProcess, pageRenderer)
+
 	requestCVLinkTask := taskRequestCVLink.NewRequestCVLinkTask(gatewayService)
 	getCVLinkProcess := processGetCVLink.NewProcess(requestCVLinkTask)
 	getCVLinkHandler := handlerGetCVLink.NewHandler(getCVLinkProcess)
@@ -51,6 +58,8 @@ func Build(cfg *registry.Config) (*App, error) {
 	mux.Handle("/static/", http.StripPrefix("/static/", staticFs))
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) })
 	mux.HandleFunc("/", indexPageHandler.HandleIndexPage)
+	mux.HandleFunc("/privacy-policy", privacyHandler.HandlePrivacyPage)
+	mux.HandleFunc("/polityka-prywatnosci", privacyHandler.HandlePrivacyPage)
 	mux.HandleFunc("/api/cv-link", getCVLinkHandler.HandleCVRequest)
 	mux.HandleFunc("/api/cv-download", downloadCVHandler.HandleDownload)
 

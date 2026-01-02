@@ -24,22 +24,27 @@ func New(templatesPath string) Renderer {
 
 	funcs := template.FuncMap{
 		"join": func(s []string) string {
-			for i, v := range s {
-				s[i] = `"` + v + `"`
-			}
 			return strings.Join(s, ", ")
+		},
+		"sub": func(a, b int) int {
+			return a - b
 		},
 	}
 
-	baseTmpl := filepath.Join(templatesPath, "layout", "base.html")
-	indexTmpl := filepath.Join(templatesPath, "index.html")
-	r.templates["index"] = template.Must(template.New("base.html").Funcs(funcs).ParseFiles(baseTmpl, indexTmpl))
+	layoutBase := filepath.Join(templatesPath, "layout", "base.html")
+	partials, _ := filepath.Glob(filepath.Join(templatesPath, "partials", "*.html"))
 
-	errorTmpl := filepath.Join(templatesPath, "error.html")
-	r.templates["error"] = template.Must(template.New("error.html").Funcs(funcs).ParseFiles(errorTmpl))
+	contentPages := []string{"index", "privacy"}
+	for _, page := range contentPages {
+		files := append([]string{layoutBase}, partials...)
+		files = append(files, filepath.Join(templatesPath, page+".html"))
+		r.templates[page] = template.Must(template.New("base.html").Funcs(funcs).ParseFiles(files...))
+	}
 
-	cvErrorTmpl := filepath.Join(templatesPath, "cv_error.html")
-	r.templates["cv_error"] = template.Must(template.New("cv_error.html").Funcs(funcs).ParseFiles(cvErrorTmpl))
+	errorPages := []string{"error", "cv_error"}
+	for _, page := range errorPages {
+		r.templates[page] = template.Must(template.New(page + ".html").Funcs(funcs).ParseFiles(filepath.Join(templatesPath, page+".html")))
+	}
 
 	return r
 }
@@ -53,31 +58,14 @@ func (r *templateRenderer) Render(w http.ResponseWriter, name string, data any) 
 	}
 
 	executeTmpl := "base"
-	if name == "error" {
-		executeTmpl = "error.html"
-	} else if name == "cv_error" {
-		executeTmpl = "cv_error.html"
+	if name == "error" || name == "cv_error" {
+		executeTmpl = name + ".html"
 	}
 
 	buf := new(bytes.Buffer)
 	if err := tmpl.ExecuteTemplate(buf, executeTmpl, data); err != nil {
 		log.Printf("ERROR: could not execute template %s: %v", name, err)
-
-		if name == "error" {
-			http.Error(w, "Critical error rendering error page", http.StatusInternalServerError)
-			return
-		}
-
-		errorData := struct {
-			Lang    string
-			Title   string
-			Message string
-		}{
-			Lang:    "en",
-			Title:   "Rendering Error",
-			Message: "A critical error occurred while rendering the page.",
-		}
-		r.Render(w, "error", errorData)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 

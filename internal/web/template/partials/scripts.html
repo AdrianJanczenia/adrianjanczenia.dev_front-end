@@ -1,0 +1,125 @@
+{{define "scripts"}}
+<script>
+    const body = document.body;
+    const navToggle = document.getElementById('nav-toggle');
+    const modal = document.getElementById('cv-modal');
+
+    const toggleScroll = () => {
+        if (navToggle && navToggle.checked || modal && modal.classList.contains('open')) {
+            body.classList.add('no-scroll');
+        } else {
+            body.classList.remove('no-scroll');
+        }
+    };
+
+    const forceReset = () => {
+        body.classList.add('no-transition');
+        if (navToggle) navToggle.checked = false;
+        toggleScroll();
+        void body.offsetHeight;
+        setTimeout(() => {
+            body.classList.remove('no-transition');
+        }, 50);
+    };
+
+    if (navToggle) navToggle.addEventListener('change', toggleScroll);
+
+    window.addEventListener('pageshow', forceReset);
+    window.addEventListener('popstate', forceReset);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            forceReset();
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('a')) {
+            const link = e.target.closest('a');
+            const href = link.getAttribute('href');
+            if (href && (href.startsWith('#') || link.getAttribute('target') === '_blank' || link.classList.contains('cv-link'))) {
+                setTimeout(forceReset, 10);
+            }
+        }
+    });
+
+    const backToTopButton = document.querySelector('.back-to-top');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 100) {
+            backToTopButton.classList.add('visible');
+        } else {
+            backToTopButton.classList.remove('visible');
+        }
+    });
+
+    const cvForm = document.getElementById('cv-form');
+    if (cvForm) {
+        const submitBtn = modal.querySelector('.modal-btn');
+        const errorMsg = document.getElementById('modal-error');
+        const passInput = document.getElementById('cv-password');
+
+        document.querySelectorAll('.cv-link').forEach(link => {
+            link.onclick = (e) => {
+                e.preventDefault();
+                forceReset();
+                modal.classList.add('open');
+                toggleScroll();
+                errorMsg.style.display = 'none';
+                passInput.value = '';
+                passInput.focus();
+            };
+        });
+
+        document.querySelector('.modal-close').onclick = () => {
+            modal.classList.remove('open');
+            toggleScroll();
+        };
+
+        window.onclick = (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('open');
+                toggleScroll();
+            }
+        };
+
+        cvForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const pass = passInput.value;
+            const lang = document.documentElement.lang;
+
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            try {
+                const res = await fetch(`/api/cv-link?password=${encodeURIComponent(pass)}&lang=${lang}`);
+
+                if (res.status === 401) {
+                    throw new Error("{{index .Content.Translations `error_cv_auth` }}");
+                }
+                if (!res.ok) {
+                    throw new Error("Server error. Please try again.");
+                }
+
+                const data = await res.json();
+                if (!data.url) throw new Error("Invalid response from server.");
+
+                const urlObj = new URL(data.url, window.location.origin);
+                const token = urlObj.searchParams.get('token');
+                const cvLang = urlObj.searchParams.get('lang');
+                const proxyUrl = `/api/cv-download?token=${token}&lang=${cvLang || lang}`;
+
+                window.open(proxyUrl, '_blank');
+                modal.classList.remove('open');
+                toggleScroll();
+
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = 'block';
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        };
+    }
+</script>
+{{end}}

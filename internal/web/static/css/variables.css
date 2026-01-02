@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Inter:wght@400;600&display=swap');
+
+:root {
+    --bg-color: #1a1b26;
+    --sidebar-bg: #16161e;
+    --text-color: #c0c5ce;
+    --header-color: #ffffff;
+    --accent-color: #33ff99;
+    --border-color: #343b58;
+    --card-bg: #24283b;
+    --key-color: #82aaff;
+    --string-color: #c3e88d;
+    --font-mono: 'Fira Code', monospace;
+    --font-sans: 'Inter', sans-serif;
+}

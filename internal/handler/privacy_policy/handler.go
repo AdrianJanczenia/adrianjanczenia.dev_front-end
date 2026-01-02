@@ -1,4 +1,4 @@
-package index_page
+package privacy_policy
 
 import (
 	"log"
@@ -25,25 +25,28 @@ func NewHandler(processExecutor Executor, renderer renderer.Renderer) *Handler {
 	}
 }
 
-func (h *Handler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandlePrivacyPage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	lang := getLanguage(r)
+	lang := "en"
+	if strings.Contains(r.URL.Path, "polityka-prywatnosci") {
+		lang = "pl"
+	}
+	if qLang := r.URL.Query().Get("lang"); qLang != "" {
+		lang = qLang
+	}
 
 	templateData, err := h.processExecutor.Execute(lang)
 	if err != nil {
-		log.Printf("ERROR: failed to execute index process: %s", strings.ReplaceAll(err.Error(), "\n", " "))
+		log.Printf("ERROR: failed to execute privacy policy process: %s", strings.ReplaceAll(err.Error(), "\n", " "))
 
-		titles := map[string]string{
-			"pl": "Wystąpił błąd",
-			"en": "An error occurred",
-		}
+		titles := map[string]string{"pl": "Wystąpił błąd", "en": "An error occurred"}
 		messages := map[string]string{
-			"pl": "Pracuję nad rozwiązaniem problemu. Spróbuj ponownie później.",
-			"en": "I'm working on fixing the problem. Please try again later.",
+			"pl": "Pracujemy nad rozwiązaniem problemu. Spróbuj ponownie później.",
+			"en": "We are working on fixing the problem. Please try again later.",
 		}
 
 		errorData := struct {
@@ -56,21 +59,10 @@ func (h *Handler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
 			Message: messages[lang],
 		}
 
-		if templateData != nil && templateData.Content != nil && templateData.Content.Translations["error_title"] != "" {
-			errorData.Title = templateData.Content.Translations["error_title"]
-			errorData.Message = templateData.Content.Translations["error_message"]
-		}
-
 		h.renderer.Render(w, "error", errorData)
 		return
 	}
 
-	h.renderer.Render(w, "index", templateData)
-}
-
-func getLanguage(r *http.Request) string {
-	if r.URL.Query().Get("lang") == "en" {
-		return "en"
-	}
-	return "pl"
+	templateData.IsPrivacyPage = true
+	h.renderer.Render(w, "privacy", templateData)
 }

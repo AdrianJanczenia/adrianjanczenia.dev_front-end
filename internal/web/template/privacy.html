@@ -1,0 +1,20 @@
+{{define "content"}}
+<section class="privacy-container">
+    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_privacy"}}</h2>
+    <div class="styled-block privacy-content">
+        {{range .Content.PrivacyPolicy.Sections}}
+        <div class="privacy-section">
+            <h3 class="key">{{.Header}}</h3>
+            <div class="privacy-items">
+                {{range .Items}}
+                <div class="privacy-item">
+                    {{if .Label}}<span class="key">{{.Label}}</span>{{end}}
+                    <p class="string">{{.Text}}</p>
+                </div>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+    </div>
+</section>
+{{end}}
