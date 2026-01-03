@@ -10,14 +10,14 @@ import (
 	"time"
 
 	handlerDownloadCV "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/download_cv"
-	handlerGetCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/get_cv_link"
+	handlerGetCVToken "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/get_cv_token"
 	handlerIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/index_page"
 	handlerPrivacyPolicy "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/privacy_policy"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
 	processDownloadCV "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/download_cv"
 	taskDownloadCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/download_cv/task"
-	processGetCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_cv_link"
-	taskRequestCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_cv_link/task"
+	processGetCVToken "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_cv_token"
+	taskRequestCVToken "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_cv_token/task"
 	processIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/index_page"
 	taskIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/index_page/task"
 	processPrivacyPolicy "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/privacy_policy"
@@ -44,9 +44,9 @@ func Build(cfg *registry.Config) (*App, error) {
 	privacyProcess := processPrivacyPolicy.NewProcess(privacyFetcherTask)
 	privacyHandler := handlerPrivacyPolicy.NewHandler(privacyProcess, pageRenderer)
 
-	requestCVLinkTask := taskRequestCVLink.NewRequestCVLinkTask(gatewayService)
-	getCVLinkProcess := processGetCVLink.NewProcess(requestCVLinkTask)
-	getCVLinkHandler := handlerGetCVLink.NewHandler(getCVLinkProcess)
+	requestCVTokenTask := taskRequestCVToken.NewRequestCVTokenTask(gatewayService)
+	getCVTokenProcess := processGetCVToken.NewProcess(requestCVTokenTask)
+	getCVTokenHandler := handlerGetCVToken.NewHandler(getCVTokenProcess)
 
 	validateCVLinkTask := taskDownloadCVLink.NewValidateLinkTask()
 	streamCVLinkTask := taskDownloadCVLink.NewFetchPDFStreamTask(gatewayService)
@@ -60,8 +60,8 @@ func Build(cfg *registry.Config) (*App, error) {
 	mux.HandleFunc("/", indexPageHandler.HandleIndexPage)
 	mux.HandleFunc("/privacy-policy", privacyHandler.HandlePrivacyPage)
 	mux.HandleFunc("/polityka-prywatnosci", privacyHandler.HandlePrivacyPage)
-	mux.HandleFunc("/api/cv-link", getCVLinkHandler.HandleCVRequest)
-	mux.HandleFunc("/api/cv-download", downloadCVHandler.HandleDownload)
+	mux.HandleFunc("/api/cv-token", getCVTokenHandler.HandleCVRequest)
+	mux.HandleFunc("/api/download/cv", downloadCVHandler.HandleDownload)
 
 	serverAddr := ":" + cfg.Server.Port
 	server := &http.Server{

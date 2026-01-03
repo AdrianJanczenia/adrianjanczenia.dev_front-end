@@ -56,7 +56,7 @@ func (c *Client) GetPageContent(lang string) (*PageContent, error) {
 	return &pageContent, nil
 }
 
-func (c *Client) RequestCV(password, lang string) (string, error) {
+func (c *Client) RequestCVToken(password, lang string) (string, error) {
 	reqBody, err := json.Marshal(map[string]string{
 		"password": password,
 		"lang":     lang,
@@ -82,13 +82,13 @@ func (c *Client) RequestCV(password, lang string) (string, error) {
 	}
 
 	var result struct {
-		DownloadURL string `json:"downloadUrl"`
+		Token string `json:"token"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return "", err
 	}
 
-	return result.DownloadURL, nil
+	return result.Token, nil
 }
 
 func (c *Client) DownloadCVStream(token, lang string) (io.ReadCloser, string, int, error) {
@@ -96,7 +96,7 @@ func (c *Client) DownloadCVStream(token, lang string) (io.ReadCloser, string, in
 	params.Add("token", token)
 	params.Add("lang", lang)
 
-	fullURL := fmt.Sprintf("%s/download/cv?%s", c.baseURL, params.Encode())
+	fullURL := fmt.Sprintf("%s/api/v1/download/cv?%s", c.baseURL, params.Encode())
 
 	resp, err := c.httpClient.Get(fullURL)
 	if err != nil {

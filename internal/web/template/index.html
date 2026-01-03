@@ -19,7 +19,7 @@
                 <p>{{.Period}}</p>
             </div>
             <div class="experience-description">
-                <p><span class="key">location:</span> <span class="string">"{{.Location}} | {{.Type}}"</span></p>
+                <p><span class="key">{{index $.Content.Translations "experience_key_location"}}:</span> <span class="string">"{{.Location}} | {{.Type}}"</span></p>
                 <br>
                 <p class="string">"{{.Summary}}"</p>
                 <br>

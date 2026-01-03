@@ -1,4 +1,4 @@
-package get_cv_link
+package get_cv_token
 
 type CVTaskExecutor interface {
 	Execute(password, lang string) (string, error)

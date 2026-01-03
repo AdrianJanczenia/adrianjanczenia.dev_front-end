@@ -56,6 +56,7 @@
         const submitBtn = modal.querySelector('.modal-btn');
         const errorMsg = document.getElementById('modal-error');
         const passInput = document.getElementById('cv-password');
+        const hpInput = document.getElementById('cv-hp-name');
 
         document.querySelectorAll('.cv-link').forEach(link => {
             link.onclick = (e) => {
@@ -83,6 +84,11 @@
 
         cvForm.onsubmit = async (e) => {
             e.preventDefault();
+
+            if (hpInput.value !== "") {
+                return;
+            }
+
             const pass = passInput.value;
             const lang = document.documentElement.lang;
 
@@ -91,7 +97,17 @@
             errorMsg.style.display = 'none';
 
             try {
-                const res = await fetch(`/api/cv-link?password=${encodeURIComponent(pass)}&lang=${lang}`);
+                const res = await fetch(`/api/cv-token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        password: pass,
+                        lang: lang,
+                        fullName: hpInput.value
+                    })
+                });
 
                 if (res.status === 401) {
                     throw new Error("{{index .Content.Translations `error_cv_auth` }}");
@@ -101,12 +117,14 @@
                 }
 
                 const data = await res.json();
-                if (!data.url) throw new Error("Invalid response from server.");
+                if (!data.token) throw new Error("Invalid response from server.");
+                if (data.token === "token") {
+                    modal.classList.remove('open');
+                    toggleScroll();
+                    return;
+                }
 
-                const urlObj = new URL(data.url, window.location.origin);
-                const token = urlObj.searchParams.get('token');
-                const cvLang = urlObj.searchParams.get('lang');
-                const proxyUrl = `/api/cv-download?token=${token}&lang=${cvLang || lang}`;
+                const proxyUrl = `/api/download/cv?token=${data.token}&lang=${lang}`;
 
                 window.open(proxyUrl, '_blank');
                 modal.classList.remove('open');

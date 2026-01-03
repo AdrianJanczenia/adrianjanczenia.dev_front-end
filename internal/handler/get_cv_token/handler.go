@@ -1,4 +1,4 @@
-package cv
+package get_cv_token
 
 import (
 	"encoding/json"
@@ -20,20 +20,34 @@ func NewHandler(processExecutor Executor) *Handler {
 }
 
 func (h *Handler) HandleCVRequest(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	password := r.URL.Query().Get("password")
-	lang := r.URL.Query().Get("lang")
+	var input struct {
+		Password string `json:"password"`
+		Lang     string `json:"lang"`
+		FullName string `json:"fullName"`
+	}
 
-	if password == "" || lang == "" {
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	url, err := h.processExecutor.Execute(password, lang)
+	if input.FullName != "" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"token": "token"})
+		return
+	}
+
+	if input.Password == "" || input.Lang == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.processExecutor.Execute(input.Password, input.Lang)
 	if err != nil {
 		if err.Error() == "status_401" {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -44,5 +58,5 @@ func (h *Handler) HandleCVRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"url": url})
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
