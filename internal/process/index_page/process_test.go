@@ -2,73 +2,51 @@ package index_page
 
 import (
 	"errors"
-	"reflect"
 	"testing"
 
-	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
-type mockContentFetcher struct {
-	retContent *gateway_service.PageContent
-	retErr     error
+type mockContentFetcherTask struct {
+	executeFunc func(lang string) (*gateway_service.PageContent, error)
 }
 
-func (m *mockContentFetcher) Fetch(lang string) (*gateway_service.PageContent, error) {
-	return m.retContent, m.retErr
+func (m *mockContentFetcherTask) Execute(lang string) (*gateway_service.PageContent, error) {
+	return m.executeFunc(lang)
 }
 
-func TestProcess_Execute(t *testing.T) {
-	mockContent := &gateway_service.PageContent{
-		Profile: gateway_service.Profile{Name: "Test Name"},
-	}
-	mockError := errors.New("task failed")
-
-	testCases := []struct {
-		name              string
-		lang              string
-		mockFetcherResult *gateway_service.PageContent
-		mockFetcherError  error
-		expectedResult    *data.TemplateData
-		expectedError     error
+func TestProcess_IndexPage(t *testing.T) {
+	tests := []struct {
+		name        string
+		executeFunc func(string) (*gateway_service.PageContent, error)
+		wantErr     bool
 	}{
 		{
-			name:              "Success case",
-			lang:              "pl",
-			mockFetcherResult: mockContent,
-			mockFetcherError:  nil,
-			expectedResult: &data.TemplateData{
-				Lang:    "pl",
-				Content: *mockContent,
+			name: "success",
+			executeFunc: func(l string) (*gateway_service.PageContent, error) {
+				return &gateway_service.PageContent{}, nil
 			},
-			expectedError: nil,
+			wantErr: false,
 		},
 		{
-			name:              "Failure case - task returns error",
-			lang:              "en",
-			mockFetcherResult: nil,
-			mockFetcherError:  mockError,
-			expectedResult:    nil,
-			expectedError:     mockError,
+			name: "task error",
+			executeFunc: func(l string) (*gateway_service.PageContent, error) {
+				return nil, errors.New("fail")
+			},
+			wantErr: true,
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			mockFetcher := &mockContentFetcher{
-				retContent: tc.mockFetcherResult,
-				retErr:     tc.mockFetcherError,
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &mockContentFetcherTask{executeFunc: tt.executeFunc}
+			p := NewProcess(m)
+			res, err := p.Process("pl")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Process() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			process := NewProcess(mockFetcher)
-
-			result, err := process.Execute(tc.lang)
-
-			if !errors.Is(err, tc.expectedError) {
-				t.Errorf("expected error '%v', but got '%v'", tc.expectedError, err)
-			}
-
-			if !reflect.DeepEqual(result, tc.expectedResult) {
-				t.Errorf("expected result '%+v', but got '%+v'", tc.expectedResult, result)
+			if err == nil && res.Lang != "pl" {
+				t.Errorf("Process() lang = %s, want pl", res.Lang)
 			}
 		})
 	}

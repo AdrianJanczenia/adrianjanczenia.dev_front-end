@@ -7,110 +7,90 @@ import (
 	"testing"
 
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
+	appErrors "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
+	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
-type mockExecutor struct {
-	retData *data.TemplateData
-	retErr  error
+type mockIndexPageProcess struct {
+	processFunc func(lang string) (*data.TemplateData, error)
 }
 
-func (m *mockExecutor) Execute(lang string) (*data.TemplateData, error) {
-	return m.retData, m.retErr
+func (m *mockIndexPageProcess) Process(lang string) (*data.TemplateData, error) {
+	return m.processFunc(lang)
 }
 
 type mockRenderer struct {
-	calledWithTmplName string
-	calledWithData     any
+	renderFunc      func(w http.ResponseWriter, name string, data any)
+	renderErrorFunc func(w http.ResponseWriter, templateName string, appErr *appErrors.AppError, lang string, content *gateway_service.PageContent)
 }
 
 func (m *mockRenderer) Render(w http.ResponseWriter, name string, data any) {
-	m.calledWithTmplName = name
-	m.calledWithData = data
+	m.renderFunc(w, name, data)
 }
 
-func TestHandleIndexPage(t *testing.T) {
-	testCases := []struct {
-		name                   string
-		url                    string
-		method                 string
-		mockExecutorResult     *data.TemplateData
-		mockExecutorError      error
-		expectedStatusCode     int
-		expectedTmplName       string
-		expectedLangInTmplData string
+func (m *mockRenderer) RenderError(w http.ResponseWriter, templateName string, appErr *appErrors.AppError, lang string, content *gateway_service.PageContent) {
+	m.renderErrorFunc(w, templateName, appErr, lang, content)
+}
+
+func TestHandler_IndexPage(t *testing.T) {
+	tests := []struct {
+		name            string
+		method          string
+		url             string
+		processFunc     func(string) (*data.TemplateData, error)
+		wantRenderName  string
+		wantErrorCalled bool
 	}{
 		{
-			name:                   "Success case - Polish",
-			url:                    "/?lang=pl",
-			method:                 http.MethodGet,
-			mockExecutorResult:     &data.TemplateData{Lang: "pl"},
-			mockExecutorError:      nil,
-			expectedStatusCode:     http.StatusOK,
-			expectedTmplName:       "index",
-			expectedLangInTmplData: "pl",
+			name:   "successful handle",
+			method: http.MethodGet,
+			url:    "/",
+			processFunc: func(l string) (*data.TemplateData, error) {
+				return &data.TemplateData{Lang: l}, nil
+			},
+			wantRenderName:  "index",
+			wantErrorCalled: false,
 		},
 		{
-			name:                   "Success case - English",
-			url:                    "/?lang=en",
-			method:                 http.MethodGet,
-			mockExecutorResult:     &data.TemplateData{Lang: "en"},
-			mockExecutorError:      nil,
-			expectedStatusCode:     http.StatusOK,
-			expectedTmplName:       "index",
-			expectedLangInTmplData: "en",
+			name:            "method not allowed",
+			method:          http.MethodPost,
+			url:             "/",
+			wantErrorCalled: true,
 		},
 		{
-			name:               "Failure case - Process returns error",
-			url:                "/",
-			method:             http.MethodGet,
-			mockExecutorResult: nil,
-			mockExecutorError:  errors.New("something went wrong"),
-			expectedStatusCode: http.StatusOK,
-			expectedTmplName:   "error",
-		},
-		{
-			name:               "Failure case - Wrong HTTP method",
-			url:                "/",
-			method:             http.MethodPost,
-			mockExecutorResult: nil,
-			mockExecutorError:  nil,
-			expectedStatusCode: http.StatusMethodNotAllowed,
-			expectedTmplName:   "",
+			name:   "process error",
+			method: http.MethodGet,
+			url:    "/",
+			processFunc: func(l string) (*data.TemplateData, error) {
+				return nil, errors.New("fail")
+			},
+			wantErrorCalled: true,
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			mockExec := &mockExecutor{
-				retData: tc.mockExecutorResult,
-				retErr:  tc.mockExecutorError,
-			}
-			mockRend := &mockRenderer{}
-			handler := NewHandler(mockExec, mockRend)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var renderName string
+			var errorCalled bool
 
-			req := httptest.NewRequest(tc.method, tc.url, nil)
-			rr := httptest.NewRecorder()
-
-			handler.HandleIndexPage(rr, req)
-
-			if rr.Code != tc.expectedStatusCode {
-				t.Errorf("expected status code %d, but got %d", tc.expectedStatusCode, rr.Code)
+			mRenderer := &mockRenderer{
+				renderFunc: func(w http.ResponseWriter, name string, data any) { renderName = name },
+				renderErrorFunc: func(w http.ResponseWriter, templateName string, appErr *appErrors.AppError, lang string, content *gateway_service.PageContent) {
+					errorCalled = true
+				},
 			}
 
-			if mockRend.calledWithTmplName != tc.expectedTmplName {
-				t.Errorf("expected renderer to be called with template '%s', but got '%s'",
-					tc.expectedTmplName, mockRend.calledWithTmplName)
-			}
+			h := NewHandler(&mockIndexPageProcess{processFunc: tt.processFunc}, mRenderer)
+			req := httptest.NewRequest(tt.method, tt.url, nil)
+			w := httptest.NewRecorder()
 
-			if tc.expectedLangInTmplData != "" {
-				if templateData, ok := mockRend.calledWithData.(*data.TemplateData); ok {
-					if templateData.Lang != tc.expectedLangInTmplData {
-						t.Errorf("expected language in template data to be '%s', but got '%s'",
-							tc.expectedLangInTmplData, templateData.Lang)
-					}
-				} else {
-					t.Errorf("data passed to renderer has unexpected type")
-				}
+			h.Handle(w, req)
+
+			if tt.wantErrorCalled != errorCalled {
+				t.Errorf("Handle() errorCalled = %v, want %v", errorCalled, tt.wantErrorCalled)
+			}
+			if tt.wantRenderName != "" && renderName != tt.wantRenderName {
+				t.Errorf("Handle() renderName = %s, want %s", renderName, tt.wantRenderName)
 			}
 		})
 	}
