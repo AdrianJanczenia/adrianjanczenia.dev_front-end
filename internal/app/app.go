@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -31,9 +32,22 @@ type App struct {
 }
 
 func Build(cfg *registry.Config) (*App, error) {
-	pageRenderer := renderer.New(cfg.Templates.Path)
-	httpClient := &http.Client{Timeout: 10 * time.Second}
+	layoutBase := filepath.Join(cfg.Templates.Path, "layout", "base.html")
+	partials, _ := filepath.Glob(filepath.Join(cfg.Templates.Path, "partials", "*.html"))
 
+	templateMap := map[string][]string{
+		"index":    append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "index.html")),
+		"privacy":  append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "privacy.html")),
+		"error":    {filepath.Join(cfg.Templates.Path, "error.html")},
+		"cv_error": {filepath.Join(cfg.Templates.Path, "cv_error.html")},
+	}
+
+	pageRenderer, err := renderer.New(templateMap)
+	if err != nil {
+		return nil, err
+	}
+
+	httpClient := &http.Client{Timeout: 10 * time.Second}
 	gatewayService := gateway_service.NewClient(httpClient, cfg.Api.GatewayURL)
 
 	contentFetcherTask := taskIndexPage.NewContentFetcherTask(gatewayService)

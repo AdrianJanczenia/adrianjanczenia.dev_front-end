@@ -1,6 +1,7 @@
 package cv_download
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -11,11 +12,11 @@ import (
 )
 
 type DownloadCVProcess interface {
-	Process(token, lang string) (io.ReadCloser, string, error)
+	Process(ctx context.Context, token, lang string) (io.ReadCloser, string, error)
 }
 
 type ContentProvider interface {
-	GetPageContent(lang string) (*gateway_service.PageContent, error)
+	GetPageContent(ctx context.Context, lang string) (*gateway_service.PageContent, error)
 }
 
 type Handler struct {
@@ -37,17 +38,17 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	lang := r.URL.Query().Get("lang")
 
 	if token == "" || lang == "" {
-		h.renderErrorPage(w, lang, appErrors.ErrInvalidInput)
+		h.renderErrorPage(r.Context(), w, lang, appErrors.ErrInvalidInput)
 		return
 	}
 
-	stream, contentType, err := h.process.Process(token, lang)
+	stream, contentType, err := h.process.Process(r.Context(), token, lang)
 	if err != nil {
 		var appErr *appErrors.AppError
 		if !errors.As(err, &appErr) {
 			appErr = appErrors.ErrCVExpired
 		}
-		h.renderErrorPage(w, lang, appErr)
+		h.renderErrorPage(r.Context(), w, lang, appErr)
 		return
 	}
 	defer stream.Close()
@@ -58,8 +59,8 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, stream)
 }
 
-func (h *Handler) renderErrorPage(w http.ResponseWriter, lang string, appErr *appErrors.AppError) {
-	content, _ := h.contentClient.GetPageContent(lang)
+func (h *Handler) renderErrorPage(ctx context.Context, w http.ResponseWriter, lang string, appErr *appErrors.AppError) {
+	content, _ := h.contentClient.GetPageContent(ctx, lang)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	h.renderer.RenderError(w, "cv_error", appErr, lang, content)
 }

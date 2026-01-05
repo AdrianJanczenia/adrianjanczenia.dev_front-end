@@ -26,10 +26,13 @@ func NewClient(httpClient *http.Client, baseURL string) *Client {
 	}
 }
 
-func (c *Client) GetPageContent(lang string) (*PageContent, error) {
+func (c *Client) GetPageContent(ctx context.Context, lang string) (*PageContent, error) {
 	url := fmt.Sprintf("%s/api/v1/content?lang=%s", c.baseURL, lang)
 
-	req, err := http.NewRequest("GET", url, nil)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, errors.ErrInternalServerError
 	}
@@ -37,10 +40,7 @@ func (c *Client) GetPageContent(lang string) (*PageContent, error) {
 	req.Header.Set("User-Agent", "PortfolioFrontend/1.0")
 	req.Header.Set("Accept", "application/json")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, errors.ErrServiceUnavailable
 	}
@@ -70,7 +70,7 @@ func (c *Client) GetPageContent(lang string) (*PageContent, error) {
 	return &pageContent, nil
 }
 
-func (c *Client) RequestCVToken(password, lang string) (string, error) {
+func (c *Client) RequestCVToken(ctx context.Context, password, lang string) (string, error) {
 	reqBody, err := json.Marshal(map[string]string{
 		"password": password,
 		"lang":     lang,
@@ -79,17 +79,17 @@ func (c *Client) RequestCVToken(password, lang string) (string, error) {
 		return "", errors.ErrInternalServerError
 	}
 
-	req, err := http.NewRequest("POST", c.baseURL+"/api/v1/cv-request", bytes.NewBuffer(reqBody))
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/api/v1/cv-request", bytes.NewBuffer(reqBody))
 	if err != nil {
 		return "", errors.ErrInternalServerError
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return "", errors.ErrServiceUnavailable
 	}
@@ -116,21 +116,21 @@ func (c *Client) RequestCVToken(password, lang string) (string, error) {
 	return result.Token, nil
 }
 
-func (c *Client) DownloadCVStream(token, lang string) (io.ReadCloser, string, error) {
+func (c *Client) DownloadCVStream(ctx context.Context, token, lang string) (io.ReadCloser, string, error) {
 	params := url.Values{}
 	params.Add("token", token)
 	params.Add("lang", lang)
 
 	fullURL := fmt.Sprintf("%s/api/v1/download/cv?%s", c.baseURL, params.Encode())
 
-	req, err := http.NewRequest("GET", fullURL, nil)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
 	if err != nil {
 		return nil, "", errors.ErrInternalServerError
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-
-	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, "", errors.ErrServiceUnavailable
 	}

@@ -15,6 +15,12 @@ type Config struct {
 		ReadTimeout  time.Duration
 		WriteTimeout time.Duration
 	}
+	Infrastructure struct {
+		Retry struct {
+			MaxAttempts  int           `yaml:"maxAttempts"`
+			DelaySeconds time.Duration `yaml:"delaySeconds"`
+		} `yaml:"retry"`
+	}
 	Api struct {
 		GatewayURL string
 	}
@@ -30,6 +36,12 @@ func LoadConfig() (*Config, error) {
 			ReadTimeout  int    `yaml:"readTimeoutSeconds"`
 			WriteTimeout int    `yaml:"writeTimeoutSeconds"`
 		} `yaml:"server"`
+		Infrastructure struct {
+			Retry struct {
+				MaxAttempts  int `yaml:"maxAttempts"`
+				DelaySeconds int `yaml:"delaySeconds"`
+			} `yaml:"retry"`
+		} `yaml:"infrastructure"`
 		Api struct {
 			GatewayURL string `yaml:"gatewayUrl"`
 		} `yaml:"api"`
@@ -61,6 +73,8 @@ func LoadConfig() (*Config, error) {
 	cfg.Server.Port = yc.Server.Port
 	cfg.Server.ReadTimeout = time.Duration(yc.Server.ReadTimeout) * time.Second
 	cfg.Server.WriteTimeout = time.Duration(yc.Server.WriteTimeout) * time.Second
+	cfg.Infrastructure.Retry.MaxAttempts = yc.Infrastructure.Retry.MaxAttempts
+	cfg.Infrastructure.Retry.DelaySeconds = time.Duration(yc.Infrastructure.Retry.DelaySeconds) * time.Second
 	cfg.Api.GatewayURL = yc.Api.GatewayURL
 	cfg.Templates.Path = yc.Templates.Path
 

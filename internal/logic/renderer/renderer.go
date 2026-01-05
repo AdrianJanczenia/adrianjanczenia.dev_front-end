@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"path/filepath"
 	"strings"
 
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
@@ -21,7 +20,7 @@ type templateRenderer struct {
 	templates map[string]*template.Template
 }
 
-func New(templatesPath string) Renderer {
+func New(templateMap map[string][]string) (Renderer, error) {
 	r := &templateRenderer{
 		templates: make(map[string]*template.Template),
 	}
@@ -35,22 +34,15 @@ func New(templatesPath string) Renderer {
 		},
 	}
 
-	layoutBase := filepath.Join(templatesPath, "layout", "base.html")
-	partials, _ := filepath.Glob(filepath.Join(templatesPath, "partials", "*.html"))
-
-	contentPages := []string{"index", "privacy"}
-	for _, page := range contentPages {
-		files := append([]string{layoutBase}, partials...)
-		files = append(files, filepath.Join(templatesPath, page+".html"))
-		r.templates[page] = template.Must(template.New("base.html").Funcs(funcs).ParseFiles(files...))
+	for name, files := range templateMap {
+		t, err := template.New("base.html").Funcs(funcs).ParseFiles(files...)
+		if err != nil {
+			return nil, err
+		}
+		r.templates[name] = t
 	}
 
-	errorPages := []string{"error", "cv_error"}
-	for _, page := range errorPages {
-		r.templates[page] = template.Must(template.New(page + ".html").Funcs(funcs).ParseFiles(filepath.Join(templatesPath, page+".html")))
-	}
-
-	return r
+	return r, nil
 }
 
 func (r *templateRenderer) Render(w http.ResponseWriter, name string, data any) {

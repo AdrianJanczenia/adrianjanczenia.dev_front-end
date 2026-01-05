@@ -1,23 +1,24 @@
 package task
 
 import (
+	"context"
 	"io"
 )
 
 type GatewayClient interface {
-	DownloadCVStream(token, lang string) (io.ReadCloser, string, error)
+	DownloadCVStream(ctx context.Context, token, lang string) (io.ReadCloser, string, error)
 }
 
 type FetchPDFStreamTask struct {
-	client GatewayClient
+	gatewayClient GatewayClient
 }
 
-func NewFetchPDFStreamTask(client GatewayClient) *FetchPDFStreamTask {
+func NewFetchPDFStreamTask(gatewayClient GatewayClient) *FetchPDFStreamTask {
 	return &FetchPDFStreamTask{
-		client: client,
+		gatewayClient: gatewayClient,
 	}
 }
 
-func (t *FetchPDFStreamTask) Execute(token, lang string) (io.ReadCloser, string, error) {
-	return t.client.DownloadCVStream(token, lang)
+func (t *FetchPDFStreamTask) Execute(ctx context.Context, token, lang string) (io.ReadCloser, string, error) {
+	return t.gatewayClient.DownloadCVStream(ctx, token, lang)
 }

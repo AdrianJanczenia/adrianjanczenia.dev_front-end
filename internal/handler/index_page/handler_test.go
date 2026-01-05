@@ -1,6 +1,7 @@
 package index_page
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -12,11 +13,11 @@ import (
 )
 
 type mockIndexPageProcess struct {
-	processFunc func(lang string) (*data.TemplateData, error)
+	processFunc func(ctx context.Context, lang string) (*data.TemplateData, error)
 }
 
-func (m *mockIndexPageProcess) Process(lang string) (*data.TemplateData, error) {
-	return m.processFunc(lang)
+func (m *mockIndexPageProcess) Process(ctx context.Context, lang string) (*data.TemplateData, error) {
+	return m.processFunc(ctx, lang)
 }
 
 type mockRenderer struct {
@@ -37,7 +38,7 @@ func TestHandler_IndexPage(t *testing.T) {
 		name            string
 		method          string
 		url             string
-		processFunc     func(string) (*data.TemplateData, error)
+		processFunc     func(context.Context, string) (*data.TemplateData, error)
 		wantRenderName  string
 		wantErrorCalled bool
 	}{
@@ -45,7 +46,7 @@ func TestHandler_IndexPage(t *testing.T) {
 			name:   "successful handle",
 			method: http.MethodGet,
 			url:    "/",
-			processFunc: func(l string) (*data.TemplateData, error) {
+			processFunc: func(ctx context.Context, l string) (*data.TemplateData, error) {
 				return &data.TemplateData{Lang: l}, nil
 			},
 			wantRenderName:  "index",
@@ -61,7 +62,7 @@ func TestHandler_IndexPage(t *testing.T) {
 			name:   "process error",
 			method: http.MethodGet,
 			url:    "/",
-			processFunc: func(l string) (*data.TemplateData, error) {
+			processFunc: func(ctx context.Context, l string) (*data.TemplateData, error) {
 				return nil, errors.New("fail")
 			},
 			wantErrorCalled: true,

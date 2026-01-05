@@ -1,19 +1,23 @@
 package task
 
+import (
+	"context"
+)
+
 type GatewayClient interface {
-	RequestCVToken(password, lang string) (string, error)
+	RequestCVToken(ctx context.Context, password, lang string) (string, error)
 }
 
 type RequestCVTokenTask struct {
-	client GatewayClient
+	gatewayClient GatewayClient
 }
 
-func NewRequestCVTokenTask(client GatewayClient) *RequestCVTokenTask {
+func NewRequestCVTokenTask(gatewayClient GatewayClient) *RequestCVTokenTask {
 	return &RequestCVTokenTask{
-		client: client,
+		gatewayClient: gatewayClient,
 	}
 }
 
-func (t *RequestCVTokenTask) Execute(password, lang string) (string, error) {
-	return t.client.RequestCVToken(password, lang)
+func (t *RequestCVTokenTask) Execute(ctx context.Context, password, lang string) (string, error) {
+	return t.gatewayClient.RequestCVToken(ctx, password, lang)
 }

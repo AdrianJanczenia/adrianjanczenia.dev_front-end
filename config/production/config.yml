@@ -3,6 +3,11 @@ server:
   readTimeoutSeconds: 5
   writeTimeoutSeconds: 10
 
+infrastructure:
+  retry:
+    maxAttempts: 20
+    delaySeconds: 5
+
 api:
   gatewayUrl: ""
 

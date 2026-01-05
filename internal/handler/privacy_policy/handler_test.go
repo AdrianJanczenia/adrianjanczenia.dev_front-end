@@ -1,6 +1,7 @@
 package privacy_policy
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -12,11 +13,11 @@ import (
 )
 
 type mockPrivacyPolicyProcess struct {
-	processFunc func(lang string) (*data.TemplateData, error)
+	processFunc func(ctx context.Context, lang string) (*data.TemplateData, error)
 }
 
-func (m *mockPrivacyPolicyProcess) Process(lang string) (*data.TemplateData, error) {
-	return m.processFunc(lang)
+func (m *mockPrivacyPolicyProcess) Process(ctx context.Context, lang string) (*data.TemplateData, error) {
+	return m.processFunc(ctx, lang)
 }
 
 type mockRenderer struct {
@@ -42,7 +43,7 @@ func TestHandler_PrivacyPolicy(t *testing.T) {
 				t.Error("expected IsPrivacyPage to be true")
 			}
 		}}
-		p := &mockPrivacyPolicyProcess{processFunc: func(l string) (*data.TemplateData, error) {
+		p := &mockPrivacyPolicyProcess{processFunc: func(ctx context.Context, l string) (*data.TemplateData, error) {
 			return &data.TemplateData{}, nil
 		}}
 		h := NewHandler(p, r)
@@ -58,7 +59,7 @@ func TestHandler_PrivacyPolicy(t *testing.T) {
 		r := &mockRenderer{renderErrorFunc: func(w http.ResponseWriter, tn string, ae *appErrors.AppError, l string, c *gateway_service.PageContent) {
 			errorCalled = true
 		}}
-		p := &mockPrivacyPolicyProcess{processFunc: func(l string) (*data.TemplateData, error) {
+		p := &mockPrivacyPolicyProcess{processFunc: func(ctx context.Context, l string) (*data.TemplateData, error) {
 			return nil, errors.New("fail")
 		}}
 		h := NewHandler(p, r)

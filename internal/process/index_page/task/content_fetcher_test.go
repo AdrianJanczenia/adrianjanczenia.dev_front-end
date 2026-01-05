@@ -1,6 +1,7 @@
 package task
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -8,29 +9,29 @@ import (
 )
 
 type mockGatewayClient struct {
-	getPageContentFunc func(lang string) (*gateway_service.PageContent, error)
+	getPageContentFunc func(ctx context.Context, lang string) (*gateway_service.PageContent, error)
 }
 
-func (m *mockGatewayClient) GetPageContent(lang string) (*gateway_service.PageContent, error) {
-	return m.getPageContentFunc(lang)
+func (m *mockGatewayClient) GetPageContent(ctx context.Context, lang string) (*gateway_service.PageContent, error) {
+	return m.getPageContentFunc(ctx, lang)
 }
 
 func TestContentFetcherTask_Execute(t *testing.T) {
 	tests := []struct {
 		name               string
-		getPageContentFunc func(string) (*gateway_service.PageContent, error)
+		getPageContentFunc func(context.Context, string) (*gateway_service.PageContent, error)
 		wantErr            bool
 	}{
 		{
 			name: "success",
-			getPageContentFunc: func(l string) (*gateway_service.PageContent, error) {
+			getPageContentFunc: func(ctx context.Context, l string) (*gateway_service.PageContent, error) {
 				return &gateway_service.PageContent{}, nil
 			},
 			wantErr: false,
 		},
 		{
 			name: "error",
-			getPageContentFunc: func(l string) (*gateway_service.PageContent, error) {
+			getPageContentFunc: func(ctx context.Context, l string) (*gateway_service.PageContent, error) {
 				return nil, errors.New("fail")
 			},
 			wantErr: true,
@@ -41,7 +42,7 @@ func TestContentFetcherTask_Execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &mockGatewayClient{getPageContentFunc: tt.getPageContentFunc}
 			task := NewContentFetcherTask(m)
-			_, err := task.Execute("pl")
+			_, err := task.Execute(context.Background(), "pl")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Execute() error = %v, wantErr %v", err, tt.wantErr)
 			}

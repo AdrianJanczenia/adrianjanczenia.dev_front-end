@@ -1,6 +1,7 @@
 package task
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -8,15 +9,15 @@ import (
 )
 
 type mockGatewayClient struct {
-	getPageContentFunc func(lang string) (*gateway_service.PageContent, error)
+	getPageContentFunc func(ctx context.Context, lang string) (*gateway_service.PageContent, error)
 }
 
-func (m *mockGatewayClient) GetPageContent(lang string) (*gateway_service.PageContent, error) {
-	return m.getPageContentFunc(lang)
+func (m *mockGatewayClient) GetPageContent(ctx context.Context, lang string) (*gateway_service.PageContent, error) {
+	return m.getPageContentFunc(ctx, lang)
 }
 
 func TestFetchPrivacyContentTask_Execute(t *testing.T) {
-	m := &mockGatewayClient{getPageContentFunc: func(l string) (*gateway_service.PageContent, error) {
+	m := &mockGatewayClient{getPageContentFunc: func(ctx context.Context, l string) (*gateway_service.PageContent, error) {
 		if l == "pl" {
 			return &gateway_service.PageContent{}, nil
 		}
@@ -24,10 +25,10 @@ func TestFetchPrivacyContentTask_Execute(t *testing.T) {
 	}}
 	task := NewFetchPrivacyContentTask(m)
 
-	if _, err := task.Execute("pl"); err != nil {
+	if _, err := task.Execute(context.Background(), "pl"); err != nil {
 		t.Errorf("expected success, got %v", err)
 	}
-	if _, err := task.Execute("en"); err == nil {
+	if _, err := task.Execute(context.Background(), "en"); err == nil {
 		t.Error("expected error")
 	}
 }

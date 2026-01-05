@@ -1,12 +1,14 @@
 package index_page
 
 import (
+	"context"
+
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
 type ContentFetcherTask interface {
-	Execute(lang string) (*gateway_service.PageContent, error)
+	Execute(ctx context.Context, lang string) (*gateway_service.PageContent, error)
 }
 
 type Process struct {
@@ -19,8 +21,8 @@ func NewProcess(contentFetcher ContentFetcherTask) *Process {
 	}
 }
 
-func (p *Process) Process(lang string) (*data.TemplateData, error) {
-	content, err := p.contentFetcher.Execute(lang)
+func (p *Process) Process(ctx context.Context, lang string) (*data.TemplateData, error) {
+	content, err := p.contentFetcher.Execute(ctx, lang)
 	if err != nil {
 		return nil, err
 	}

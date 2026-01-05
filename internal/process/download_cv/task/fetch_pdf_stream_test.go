@@ -1,6 +1,7 @@
 package task
 
 import (
+	"context"
 	"errors"
 	"io"
 	"strings"
@@ -8,16 +9,16 @@ import (
 )
 
 type mockGatewayClient struct {
-	downloadCVStreamFunc func(token, lang string) (io.ReadCloser, string, error)
+	downloadCVStreamFunc func(ctx context.Context, token, lang string) (io.ReadCloser, string, error)
 }
 
-func (m *mockGatewayClient) DownloadCVStream(token, lang string) (io.ReadCloser, string, error) {
-	return m.downloadCVStreamFunc(token, lang)
+func (m *mockGatewayClient) DownloadCVStream(ctx context.Context, token, lang string) (io.ReadCloser, string, error) {
+	return m.downloadCVStreamFunc(ctx, token, lang)
 }
 
 func TestFetchPDFStreamTask_Execute(t *testing.T) {
 	m := &mockGatewayClient{
-		downloadCVStreamFunc: func(t, l string) (io.ReadCloser, string, error) {
+		downloadCVStreamFunc: func(ctx context.Context, t, l string) (io.ReadCloser, string, error) {
 			if t == "valid" {
 				return io.NopCloser(strings.NewReader("pdf")), "application/pdf", nil
 			}
@@ -27,7 +28,7 @@ func TestFetchPDFStreamTask_Execute(t *testing.T) {
 	task := NewFetchPDFStreamTask(m)
 
 	t.Run("success", func(t *testing.T) {
-		stream, contentType, err := task.Execute("valid", "pl")
+		stream, contentType, err := task.Execute(context.Background(), "valid", "pl")
 		if err != nil || contentType != "application/pdf" {
 			t.Errorf("unexpected results: %v, %s", err, contentType)
 		}
@@ -35,7 +36,7 @@ func TestFetchPDFStreamTask_Execute(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		_, _, err := task.Execute("invalid", "pl")
+		_, _, err := task.Execute(context.Background(), "invalid", "pl")
 		if err == nil {
 			t.Error("expected error")
 		}

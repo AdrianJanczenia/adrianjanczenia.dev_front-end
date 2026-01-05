@@ -1,11 +1,13 @@
 package privacy_policy
 
 import (
+	"context"
+
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
 )
 
 type FetchPrivacyContentTask interface {
-	Execute(lang string) (*data.TemplateData, error)
+	Execute(ctx context.Context, lang string) (*data.TemplateData, error)
 }
 
 type Process struct {
@@ -18,6 +20,6 @@ func NewProcess(fetchPrivacyContentTask FetchPrivacyContentTask) *Process {
 	}
 }
 
-func (p *Process) Process(lang string) (*data.TemplateData, error) {
-	return p.fetchPrivacyContentTask.Execute(lang)
+func (p *Process) Process(ctx context.Context, lang string) (*data.TemplateData, error) {
+	return p.fetchPrivacyContentTask.Execute(ctx, lang)
 }

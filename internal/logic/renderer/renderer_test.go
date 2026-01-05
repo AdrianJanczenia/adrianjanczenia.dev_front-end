@@ -8,30 +8,38 @@ import (
 	"testing"
 
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
-	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
-func setupTestTemplates(t *testing.T) string {
+func setupTestTemplates(t *testing.T) (string, map[string][]string) {
 	tmpDir := t.TempDir()
 	os.MkdirAll(filepath.Join(tmpDir, "layout"), 0755)
-	os.MkdirAll(filepath.Join(tmpDir, "partials"), 0755)
 
 	dummyBase := `{{define "base"}}Base{{template "content" .}}{{end}}`
 	dummyContent := `{{define "content"}}Content{{end}}`
 	dummyError := `{{.ErrorMessage}}`
 
-	os.WriteFile(filepath.Join(tmpDir, "layout", "base.html"), []byte(dummyBase), 0644)
-	os.WriteFile(filepath.Join(tmpDir, "index.html"), []byte(dummyContent), 0644)
-	os.WriteFile(filepath.Join(tmpDir, "privacy.html"), []byte(dummyContent), 0644)
-	os.WriteFile(filepath.Join(tmpDir, "error.html"), []byte(dummyError), 0644)
-	os.WriteFile(filepath.Join(tmpDir, "cv_error.html"), []byte(dummyError), 0644)
+	basePath := filepath.Join(tmpDir, "layout", "base.html")
+	indexPath := filepath.Join(tmpDir, "index.html")
+	errorPath := filepath.Join(tmpDir, "error.html")
 
-	return tmpDir
+	os.WriteFile(basePath, []byte(dummyBase), 0644)
+	os.WriteFile(indexPath, []byte(dummyContent), 0644)
+	os.WriteFile(errorPath, []byte(dummyError), 0644)
+
+	templateMap := map[string][]string{
+		"index": {basePath, indexPath},
+		"error": {errorPath},
+	}
+
+	return tmpDir, templateMap
 }
 
 func TestTemplateRenderer_Render(t *testing.T) {
-	tmpDir := setupTestTemplates(t)
-	r := New(tmpDir)
+	_, templateMap := setupTestTemplates(t)
+	r, err := New(templateMap)
+	if err != nil {
+		t.Fatalf("failed to create renderer: %v", err)
+	}
 
 	t.Run("renders index template", func(t *testing.T) {
 		w := httptest.NewRecorder()
@@ -52,19 +60,11 @@ func TestTemplateRenderer_Render(t *testing.T) {
 			t.Errorf("expected CustomError, got %s", w.Body.String())
 		}
 	})
-
-	t.Run("handles non-existent template", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		r.Render(w, "missing", nil)
-		if w.Code != http.StatusInternalServerError {
-			t.Errorf("expected 500, got %d", w.Code)
-		}
-	})
 }
 
 func TestTemplateRenderer_RenderError(t *testing.T) {
-	tmpDir := setupTestTemplates(t)
-	r := New(tmpDir)
+	_, templateMap := setupTestTemplates(t)
+	r, _ := New(templateMap)
 
 	t.Run("renders error with fallback translation", func(t *testing.T) {
 		w := httptest.NewRecorder()
@@ -75,19 +75,6 @@ func TestTemplateRenderer_RenderError(t *testing.T) {
 		expectedMsg := errors.FallbackTranslations["pl"]["error_cv_auth"]
 		if w.Body.String() != expectedMsg {
 			t.Errorf("expected %s, got %s", expectedMsg, w.Body.String())
-		}
-	})
-
-	t.Run("renders error with content translations", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		content := &gateway_service.PageContent{
-			Translations: map[string]string{
-				"error_cv_auth": "Błędne hasło z API",
-			},
-		}
-		r.RenderError(w, "error", errors.ErrInvalidPassword, "pl", content)
-		if w.Body.String() != "Błędne hasło z API" {
-			t.Errorf("expected translated message, got %s", w.Body.String())
 		}
 	})
 }

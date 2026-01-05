@@ -1,6 +1,7 @@
 package privacy_policy
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 )
 
 type PrivacyPolicyProcess interface {
-	Process(lang string) (*data.TemplateData, error)
+	Process(ctx context.Context, lang string) (*data.TemplateData, error)
 }
 
 type Handler struct {
@@ -41,7 +42,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		lang = qLang
 	}
 
-	templateData, err := h.process.Process(lang)
+	templateData, err := h.process.Process(r.Context(), lang)
 	if err != nil {
 		log.Printf("ERROR: failed to execute privacy policy process: %s", strings.ReplaceAll(err.Error(), "\n", " "))
 

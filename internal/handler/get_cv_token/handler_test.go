@@ -2,6 +2,7 @@ package get_cv_token
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -10,11 +11,11 @@ import (
 )
 
 type mockGetCVTokenProcess struct {
-	processFunc func(password, lang string) (string, error)
+	processFunc func(ctx context.Context, password, lang string) (string, error)
 }
 
-func (m *mockGetCVTokenProcess) Process(password, lang string) (string, error) {
-	return m.processFunc(password, lang)
+func (m *mockGetCVTokenProcess) Process(ctx context.Context, password, lang string) (string, error) {
+	return m.processFunc(ctx, password, lang)
 }
 
 func TestHandler_GetCVToken(t *testing.T) {
@@ -22,7 +23,7 @@ func TestHandler_GetCVToken(t *testing.T) {
 		name        string
 		method      string
 		body        any
-		processFunc func(string, string) (string, error)
+		processFunc func(context.Context, string, string) (string, error)
 		wantStatus  int
 		wantToken   string
 	}{
@@ -30,7 +31,7 @@ func TestHandler_GetCVToken(t *testing.T) {
 			name:   "success",
 			method: http.MethodPost,
 			body:   input{Password: "123", Lang: "pl"},
-			processFunc: func(p, l string) (string, error) {
+			processFunc: func(ctx context.Context, p, l string) (string, error) {
 				return "tok123", nil
 			},
 			wantStatus: http.StatusOK,
@@ -53,7 +54,7 @@ func TestHandler_GetCVToken(t *testing.T) {
 			name:   "process error",
 			method: http.MethodPost,
 			body:   input{Password: "wrong", Lang: "en"},
-			processFunc: func(p, l string) (string, error) {
+			processFunc: func(ctx context.Context, p, l string) (string, error) {
 				return "", errors.New("fail")
 			},
 			wantStatus: http.StatusInternalServerError,

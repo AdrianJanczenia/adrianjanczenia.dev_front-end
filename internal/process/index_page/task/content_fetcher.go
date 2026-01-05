@@ -1,9 +1,13 @@
 package task
 
-import "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
+import (
+	"context"
+
+	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
+)
 
 type GatewayClient interface {
-	GetPageContent(lang string) (*gateway_service.PageContent, error)
+	GetPageContent(ctx context.Context, lang string) (*gateway_service.PageContent, error)
 }
 
 type ContentFetcherTask struct {
@@ -16,6 +20,6 @@ func NewContentFetcherTask(gatewayClient GatewayClient) *ContentFetcherTask {
 	}
 }
 
-func (t *ContentFetcherTask) Execute(lang string) (*gateway_service.PageContent, error) {
-	return t.gatewayClient.GetPageContent(lang)
+func (t *ContentFetcherTask) Execute(ctx context.Context, lang string) (*gateway_service.PageContent, error) {
+	return t.gatewayClient.GetPageContent(ctx, lang)
 }

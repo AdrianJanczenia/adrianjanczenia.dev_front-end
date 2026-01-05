@@ -1,7 +1,9 @@
 package get_cv_token
 
+import "context"
+
 type RequestCVTokenTask interface {
-	Execute(password, lang string) (string, error)
+	Execute(ctx context.Context, password, lang string) (string, error)
 }
 
 type Process struct {
@@ -14,6 +16,6 @@ func NewProcess(task RequestCVTokenTask) *Process {
 	}
 }
 
-func (p *Process) Process(password, lang string) (string, error) {
-	return p.cvTokenTask.Execute(password, lang)
+func (p *Process) Process(ctx context.Context, password, lang string) (string, error) {
+	return p.cvTokenTask.Execute(ctx, password, lang)
 }

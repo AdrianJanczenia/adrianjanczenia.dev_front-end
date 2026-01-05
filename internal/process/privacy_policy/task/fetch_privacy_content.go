@@ -1,26 +1,28 @@
 package task
 
 import (
+	"context"
+
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
-type GatewayClient interface {
-	GetPageContent(lang string) (*gateway_service.PageContent, error)
+type ContentService interface {
+	GetPageContent(ctx context.Context, lang string) (*gateway_service.PageContent, error)
 }
 
 type FetchPrivacyContentTask struct {
-	gatewayClient GatewayClient
+	contentService ContentService
 }
 
-func NewFetchPrivacyContentTask(gatewayClient GatewayClient) *FetchPrivacyContentTask {
+func NewFetchPrivacyContentTask(contentService ContentService) *FetchPrivacyContentTask {
 	return &FetchPrivacyContentTask{
-		gatewayClient: gatewayClient,
+		contentService: contentService,
 	}
 }
 
-func (t *FetchPrivacyContentTask) Execute(lang string) (*data.TemplateData, error) {
-	content, err := t.gatewayClient.GetPageContent(lang)
+func (t *FetchPrivacyContentTask) Execute(ctx context.Context, lang string) (*data.TemplateData, error) {
+	content, err := t.contentService.GetPageContent(ctx, lang)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package download_cv
 
 import (
+	"context"
 	"io"
 )
 
@@ -9,7 +10,7 @@ type Validator interface {
 }
 
 type Streamer interface {
-	Execute(token, lang string) (io.ReadCloser, string, error)
+	Execute(ctx context.Context, token, lang string) (io.ReadCloser, string, error)
 }
 
 type Process struct {
@@ -24,9 +25,9 @@ func NewProcess(v Validator, s Streamer) *Process {
 	}
 }
 
-func (p *Process) Process(token, lang string) (io.ReadCloser, string, error) {
+func (p *Process) Process(ctx context.Context, token, lang string) (io.ReadCloser, string, error) {
 	if err := p.validator.Execute(token, lang); err != nil {
 		return nil, "", err
 	}
-	return p.streamer.Execute(token, lang)
+	return p.streamer.Execute(ctx, token, lang)
 }

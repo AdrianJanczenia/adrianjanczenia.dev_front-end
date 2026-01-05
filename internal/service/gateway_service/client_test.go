@@ -1,6 +1,7 @@
 package gateway_service
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +40,7 @@ func TestClient_GetPageContent(t *testing.T) {
 			defer ts.Close()
 
 			c := NewClient(&http.Client{}, ts.URL)
-			res, err := c.GetPageContent("pl")
+			res, err := c.GetPageContent(context.Background(), "pl")
 
 			if err != tt.wantErr {
 				t.Errorf("GetPageContent() error = %v, wantErr %v", err, tt.wantErr)
@@ -83,7 +84,7 @@ func TestClient_RequestCVToken(t *testing.T) {
 			defer ts.Close()
 
 			c := NewClient(&http.Client{}, ts.URL)
-			token, err := c.RequestCVToken("pass", "pl")
+			token, err := c.RequestCVToken(context.Background(), "pass", "pl")
 
 			if err != tt.wantErr {
 				t.Errorf("RequestCVToken() error = %v, wantErr %v", err, tt.wantErr)
@@ -110,7 +111,7 @@ func TestClient_DownloadCVStream(t *testing.T) {
 	c := NewClient(&http.Client{}, ts.URL)
 
 	t.Run("successful stream", func(t *testing.T) {
-		body, contentType, err := c.DownloadCVStream("valid", "pl")
+		body, contentType, err := c.DownloadCVStream(context.Background(), "valid", "pl")
 		if err != nil {
 			t.Fatalf("DownloadCVStream() unexpected error: %v", err)
 		}
@@ -122,7 +123,7 @@ func TestClient_DownloadCVStream(t *testing.T) {
 	})
 
 	t.Run("expired token", func(t *testing.T) {
-		_, _, err := c.DownloadCVStream("expired", "pl")
+		_, _, err := c.DownloadCVStream(context.Background(), "expired", "pl")
 		if err != errors.ErrCVExpired {
 			t.Errorf("DownloadCVStream() expected ErrCVExpired, got %v", err)
 		}
