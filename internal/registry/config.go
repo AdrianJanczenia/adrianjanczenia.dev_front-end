@@ -16,13 +16,10 @@ type Config struct {
 		WriteTimeout time.Duration
 	}
 	Api struct {
-		BaseURL string
+		GatewayURL string
 	}
 	Templates struct {
 		Path string
-	}
-	Cv struct {
-		Password string
 	}
 }
 
@@ -34,14 +31,11 @@ func LoadConfig() (*Config, error) {
 			WriteTimeout int    `yaml:"writeTimeoutSeconds"`
 		} `yaml:"server"`
 		Api struct {
-			BaseURL string `yaml:"baseUrl"`
+			GatewayURL string `yaml:"gatewayUrl"`
 		} `yaml:"api"`
 		Templates struct {
 			Path string `yaml:"path"`
 		} `yaml:"templates"`
-		Cv struct {
-			Password string `yaml:"password"`
-		} `yaml:"cv"`
 	}
 
 	env := os.Getenv("APP_ENV")
@@ -67,13 +61,10 @@ func LoadConfig() (*Config, error) {
 	cfg.Server.Port = yc.Server.Port
 	cfg.Server.ReadTimeout = time.Duration(yc.Server.ReadTimeout) * time.Second
 	cfg.Server.WriteTimeout = time.Duration(yc.Server.WriteTimeout) * time.Second
-	cfg.Api.BaseURL = yc.Api.BaseURL
+	cfg.Api.GatewayURL = yc.Api.GatewayURL
 	cfg.Templates.Path = yc.Templates.Path
-	cfg.Cv.Password = yc.Cv.Password
 
-	overrideFromEnv("SERVER_PORT", &cfg.Server.Port)
-	overrideFromEnv("GATEWAY_URL", &cfg.Api.BaseURL)
-	overrideFromEnv("CV_PASSWORD", &cfg.Cv.Password)
+	overrideFromEnv("GATEWAY_URL", &cfg.Api.GatewayURL)
 
 	return cfg, nil
 }

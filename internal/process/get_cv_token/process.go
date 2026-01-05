@@ -1,19 +1,19 @@
 package get_cv_token
 
-type CVTaskExecutor interface {
+type RequestCVTokenTask interface {
 	Execute(password, lang string) (string, error)
 }
 
 type Process struct {
-	taskExecutor CVTaskExecutor
+	cvTokenTask RequestCVTokenTask
 }
 
-func NewProcess(taskExecutor CVTaskExecutor) *Process {
+func NewProcess(task RequestCVTokenTask) *Process {
 	return &Process{
-		taskExecutor: taskExecutor,
+		cvTokenTask: task,
 	}
 }
 
-func (p *Process) Execute(password, lang string) (string, error) {
-	return p.taskExecutor.Execute(password, lang)
+func (p *Process) Process(password, lang string) (string, error) {
+	return p.cvTokenTask.Execute(password, lang)
 }

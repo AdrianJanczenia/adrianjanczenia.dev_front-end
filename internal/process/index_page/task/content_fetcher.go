@@ -2,20 +2,20 @@ package task
 
 import "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 
-type ContentProvider interface {
+type GatewayClient interface {
 	GetPageContent(lang string) (*gateway_service.PageContent, error)
 }
 
 type ContentFetcherTask struct {
-	contentProvider ContentProvider
+	gatewayClient GatewayClient
 }
 
-func NewContentFetcherTask(contentProvider ContentProvider) *ContentFetcherTask {
+func NewContentFetcherTask(gatewayClient GatewayClient) *ContentFetcherTask {
 	return &ContentFetcherTask{
-		contentProvider: contentProvider,
+		gatewayClient: gatewayClient,
 	}
 }
 
-func (t *ContentFetcherTask) Fetch(lang string) (*gateway_service.PageContent, error) {
-	return t.contentProvider.GetPageContent(lang)
+func (t *ContentFetcherTask) Execute(lang string) (*gateway_service.PageContent, error) {
+	return t.gatewayClient.GetPageContent(lang)
 }

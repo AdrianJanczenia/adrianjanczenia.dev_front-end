@@ -116,7 +116,7 @@ func (c *Client) RequestCVToken(password, lang string) (string, error) {
 	return result.Token, nil
 }
 
-func (c *Client) DownloadCVStream(token, lang string) (io.ReadCloser, string, int, error) {
+func (c *Client) DownloadCVStream(token, lang string) (io.ReadCloser, string, error) {
 	params := url.Values{}
 	params.Add("token", token)
 	params.Add("lang", lang)
@@ -125,14 +125,14 @@ func (c *Client) DownloadCVStream(token, lang string) (io.ReadCloser, string, in
 
 	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
-		return nil, "", http.StatusInternalServerError, errors.ErrInternalServerError
+		return nil, "", errors.ErrInternalServerError
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, "", http.StatusServiceUnavailable, errors.ErrServiceUnavailable
+		return nil, "", errors.ErrServiceUnavailable
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -151,8 +151,8 @@ func (c *Client) DownloadCVStream(token, lang string) (io.ReadCloser, string, in
 			appErr = errors.FromHTTPStatus(resp.StatusCode)
 		}
 
-		return nil, "", appErr.HTTPStatus, appErr
+		return nil, "", appErr
 	}
 
-	return resp.Body, resp.Header.Get("Content-Type"), resp.StatusCode, nil
+	return resp.Body, resp.Header.Get("Content-Type"), nil
 }

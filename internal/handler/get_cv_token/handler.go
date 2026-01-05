@@ -7,49 +7,51 @@ import (
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
 )
 
-type Executor interface {
-	Execute(password, lang string) (string, error)
+type input struct {
+	Password string `json:"password"`
+	Lang     string `json:"lang"`
+	FullName string `json:"fullName"`
+}
+
+type GetCVTokenProcess interface {
+	Process(password, lang string) (string, error)
 }
 
 type Handler struct {
-	processExecutor Executor
+	process GetCVTokenProcess
 }
 
-func NewHandler(processExecutor Executor) *Handler {
+func NewHandler(process GetCVTokenProcess) *Handler {
 	return &Handler{
-		processExecutor: processExecutor,
+		process: process,
 	}
 }
 
-func (h *Handler) HandleCVRequest(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		errors.WriteJSON(w, errors.ErrMethodNotAllowed)
 		return
 	}
 
-	var input struct {
-		Password string `json:"password"`
-		Lang     string `json:"lang"`
-		FullName string `json:"fullName"`
-	}
+	var i input
 
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&i); err != nil {
 		errors.WriteJSON(w, errors.ErrInvalidInput)
 		return
 	}
 
-	if input.FullName != "" {
+	if i.FullName != "" {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"token": "token"})
 		return
 	}
 
-	if input.Password == "" || input.Lang == "" {
+	if i.Password == "" || i.Lang == "" {
 		errors.WriteJSON(w, errors.ErrInvalidInput)
 		return
 	}
 
-	token, err := h.processExecutor.Execute(input.Password, input.Lang)
+	token, err := h.process.Process(i.Password, i.Lang)
 	if err != nil {
 		errors.WriteJSON(w, err)
 		return

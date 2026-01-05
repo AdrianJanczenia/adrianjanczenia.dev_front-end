@@ -9,7 +9,7 @@ type Validator interface {
 }
 
 type Streamer interface {
-	Execute(token, lang string) (io.ReadCloser, string, int, error)
+	Execute(token, lang string) (io.ReadCloser, string, error)
 }
 
 type Process struct {
@@ -24,9 +24,9 @@ func NewProcess(v Validator, s Streamer) *Process {
 	}
 }
 
-func (p *Process) Execute(token, lang string) (io.ReadCloser, string, int, error) {
+func (p *Process) Process(token, lang string) (io.ReadCloser, string, error) {
 	if err := p.validator.Execute(token, lang); err != nil {
-		return nil, "", 0, err
+		return nil, "", err
 	}
 	return p.streamer.Execute(token, lang)
 }

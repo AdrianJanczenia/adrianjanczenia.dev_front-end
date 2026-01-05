@@ -11,23 +11,23 @@ import (
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
 )
 
-type Executor interface {
-	Execute(lang string) (*data.TemplateData, error)
+type PrivacyPolicyProcess interface {
+	Process(lang string) (*data.TemplateData, error)
 }
 
 type Handler struct {
-	processExecutor Executor
-	renderer        renderer.Renderer
+	process  PrivacyPolicyProcess
+	renderer renderer.Renderer
 }
 
-func NewHandler(processExecutor Executor, renderer renderer.Renderer) *Handler {
+func NewHandler(process PrivacyPolicyProcess, renderer renderer.Renderer) *Handler {
 	return &Handler{
-		processExecutor: processExecutor,
-		renderer:        renderer,
+		process:  process,
+		renderer: renderer,
 	}
 }
 
-func (h *Handler) HandlePrivacyPage(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		h.renderer.RenderError(w, "error", appErrors.ErrMethodNotAllowed, "pl", nil)
 		return
@@ -41,7 +41,7 @@ func (h *Handler) HandlePrivacyPage(w http.ResponseWriter, r *http.Request) {
 		lang = qLang
 	}
 
-	templateData, err := h.processExecutor.Execute(lang)
+	templateData, err := h.process.Process(lang)
 	if err != nil {
 		log.Printf("ERROR: failed to execute privacy policy process: %s", strings.ReplaceAll(err.Error(), "\n", " "))
 

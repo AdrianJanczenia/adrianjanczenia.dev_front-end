@@ -4,20 +4,20 @@ import (
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
 )
 
-type Task interface {
-	Run(lang string) (*data.TemplateData, error)
+type FetchPrivacyContentTask interface {
+	Execute(lang string) (*data.TemplateData, error)
 }
 
 type Process struct {
-	fetchTask Task
+	fetchPrivacyContentTask FetchPrivacyContentTask
 }
 
-func NewProcess(fetchTask Task) *Process {
+func NewProcess(fetchPrivacyContentTask FetchPrivacyContentTask) *Process {
 	return &Process{
-		fetchTask: fetchTask,
+		fetchPrivacyContentTask: fetchPrivacyContentTask,
 	}
 }
 
-func (p *Process) Execute(lang string) (*data.TemplateData, error) {
-	return p.fetchTask.Run(lang)
+func (p *Process) Process(lang string) (*data.TemplateData, error) {
+	return p.fetchPrivacyContentTask.Execute(lang)
 }

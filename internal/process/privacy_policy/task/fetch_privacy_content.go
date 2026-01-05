@@ -1,30 +1,28 @@
 package task
 
 import (
-	"fmt"
-
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
-type ContentProvider interface {
+type GatewayClient interface {
 	GetPageContent(lang string) (*gateway_service.PageContent, error)
 }
 
 type FetchPrivacyContentTask struct {
-	gatewayClient ContentProvider
+	gatewayClient GatewayClient
 }
 
-func NewFetchPrivacyContentTask(gatewayClient ContentProvider) *FetchPrivacyContentTask {
+func NewFetchPrivacyContentTask(gatewayClient GatewayClient) *FetchPrivacyContentTask {
 	return &FetchPrivacyContentTask{
 		gatewayClient: gatewayClient,
 	}
 }
 
-func (t *FetchPrivacyContentTask) Run(lang string) (*data.TemplateData, error) {
+func (t *FetchPrivacyContentTask) Execute(lang string) (*data.TemplateData, error) {
 	content, err := t.gatewayClient.GetPageContent(lang)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch content from gateway: %w", err)
+		return nil, err
 	}
 
 	return &data.TemplateData{

@@ -4,20 +4,20 @@ import (
 	"io"
 )
 
-type GatewayStreamClient interface {
-	DownloadCVStream(token, lang string) (io.ReadCloser, string, int, error)
+type GatewayClient interface {
+	DownloadCVStream(token, lang string) (io.ReadCloser, string, error)
 }
 
 type FetchPDFStreamTask struct {
-	client GatewayStreamClient
+	client GatewayClient
 }
 
-func NewFetchPDFStreamTask(client GatewayStreamClient) *FetchPDFStreamTask {
+func NewFetchPDFStreamTask(client GatewayClient) *FetchPDFStreamTask {
 	return &FetchPDFStreamTask{
 		client: client,
 	}
 }
 
-func (t *FetchPDFStreamTask) Execute(token, lang string) (io.ReadCloser, string, int, error) {
+func (t *FetchPDFStreamTask) Execute(token, lang string) (io.ReadCloser, string, error) {
 	return t.client.DownloadCVStream(token, lang)
 }

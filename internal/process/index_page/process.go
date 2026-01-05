@@ -5,22 +5,22 @@ import (
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
-type ContentFetcher interface {
-	Fetch(lang string) (*gateway_service.PageContent, error)
+type ContentFetcherTask interface {
+	Execute(lang string) (*gateway_service.PageContent, error)
 }
 
 type Process struct {
-	contentFetcher ContentFetcher
+	contentFetcher ContentFetcherTask
 }
 
-func NewProcess(contentFetcher ContentFetcher) *Process {
+func NewProcess(contentFetcher ContentFetcherTask) *Process {
 	return &Process{
 		contentFetcher: contentFetcher,
 	}
 }
 
-func (p *Process) Execute(lang string) (*data.TemplateData, error) {
-	content, err := p.contentFetcher.Fetch(lang)
+func (p *Process) Process(lang string) (*data.TemplateData, error) {
+	content, err := p.contentFetcher.Execute(lang)
 	if err != nil {
 		return nil, err
 	}

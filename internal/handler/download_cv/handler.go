@@ -10,8 +10,8 @@ import (
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
-type Executor interface {
-	Execute(token, lang string) (io.ReadCloser, string, int, error)
+type DownloadCVProcess interface {
+	Process(token, lang string) (io.ReadCloser, string, error)
 }
 
 type ContentProvider interface {
@@ -19,20 +19,20 @@ type ContentProvider interface {
 }
 
 type Handler struct {
-	processExecutor Executor
-	contentClient   ContentProvider
-	renderer        renderer.Renderer
+	process       DownloadCVProcess
+	contentClient ContentProvider
+	renderer      renderer.Renderer
 }
 
-func NewHandler(e Executor, c ContentProvider, r renderer.Renderer) *Handler {
+func NewHandler(process DownloadCVProcess, contentClient ContentProvider, renderer renderer.Renderer) *Handler {
 	return &Handler{
-		processExecutor: e,
-		contentClient:   c,
-		renderer:        r,
+		process:       process,
+		contentClient: contentClient,
+		renderer:      renderer,
 	}
 }
 
-func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 	lang := r.URL.Query().Get("lang")
 
@@ -41,7 +41,7 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stream, contentType, _, err := h.processExecutor.Execute(token, lang)
+	stream, contentType, err := h.process.Process(token, lang)
 	if err != nil {
 		var appErr *appErrors.AppError
 		if !errors.As(err, &appErr) {

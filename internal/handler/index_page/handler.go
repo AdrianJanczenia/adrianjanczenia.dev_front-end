@@ -11,23 +11,23 @@ import (
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
 )
 
-type Executor interface {
-	Execute(lang string) (*data.TemplateData, error)
+type IndexPageProcess interface {
+	Process(lang string) (*data.TemplateData, error)
 }
 
 type Handler struct {
-	processExecutor Executor
-	renderer        renderer.Renderer
+	process  IndexPageProcess
+	renderer renderer.Renderer
 }
 
-func NewHandler(processExecutor Executor, renderer renderer.Renderer) *Handler {
+func NewHandler(process IndexPageProcess, renderer renderer.Renderer) *Handler {
 	return &Handler{
-		processExecutor: processExecutor,
-		renderer:        renderer,
+		process:  process,
+		renderer: renderer,
 	}
 }
 
-func (h *Handler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		h.renderer.RenderError(w, "error", appErrors.ErrMethodNotAllowed, getLanguage(r), nil)
 		return
@@ -35,7 +35,7 @@ func (h *Handler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
 
 	lang := getLanguage(r)
 
-	templateData, err := h.processExecutor.Execute(lang)
+	templateData, err := h.process.Process(lang)
 	if err != nil {
 		log.Printf("ERROR: failed to execute index process: %s", strings.ReplaceAll(err.Error(), "\n", " "))
 
@@ -45,6 +45,7 @@ func (h *Handler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		h.renderer.RenderError(w, "error", appErr, lang, nil)
+
 		return
 	}
 
@@ -55,5 +56,6 @@ func getLanguage(r *http.Request) string {
 	if r.URL.Query().Get("lang") == "en" {
 		return "en"
 	}
+
 	return "pl"
 }

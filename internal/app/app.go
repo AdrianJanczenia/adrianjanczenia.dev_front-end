@@ -34,7 +34,7 @@ func Build(cfg *registry.Config) (*App, error) {
 	pageRenderer := renderer.New(cfg.Templates.Path)
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
-	gatewayService := gateway_service.NewClient(httpClient, cfg.Api.BaseURL)
+	gatewayService := gateway_service.NewClient(httpClient, cfg.Api.GatewayURL)
 
 	contentFetcherTask := taskIndexPage.NewContentFetcherTask(gatewayService)
 	indexPageProcess := processIndexPage.NewProcess(contentFetcherTask)
@@ -57,11 +57,11 @@ func Build(cfg *registry.Config) (*App, error) {
 	staticFs := http.FileServer(http.Dir("./internal/web/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", staticFs))
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) })
-	mux.HandleFunc("/", indexPageHandler.HandleIndexPage)
-	mux.HandleFunc("/privacy-policy", privacyHandler.HandlePrivacyPage)
-	mux.HandleFunc("/polityka-prywatnosci", privacyHandler.HandlePrivacyPage)
-	mux.HandleFunc("/api/cv-token", getCVTokenHandler.HandleCVRequest)
-	mux.HandleFunc("/api/download/cv", downloadCVHandler.HandleDownload)
+	mux.HandleFunc("/", indexPageHandler.Handle)
+	mux.HandleFunc("/privacy-policy", privacyHandler.Handle)
+	mux.HandleFunc("/polityka-prywatnosci", privacyHandler.Handle)
+	mux.HandleFunc("/api/cv-token", getCVTokenHandler.Handle)
+	mux.HandleFunc("/api/download/cv", downloadCVHandler.Handle)
 
 	serverAddr := ":" + cfg.Server.Port
 	server := &http.Server{

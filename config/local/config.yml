@@ -4,10 +4,7 @@ server:
   writeTimeoutSeconds: 10
 
 api:
-  baseUrl: ""
+  gatewayUrl: ""
 
 templates:
   path: "internal/web/template"
-
-cv:
-  password: "local_password"
