@@ -1,8 +1,9 @@
 package task
 
 import (
-	"errors"
 	"regexp"
+
+	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
 )
 
 type ValidateLinkTask struct{}
@@ -13,12 +14,12 @@ func NewValidateLinkTask() *ValidateLinkTask {
 
 func (t *ValidateLinkTask) Execute(token, lang string) error {
 	if lang != "pl" && lang != "en" {
-		return errors.New("invalid_lang")
+		return errors.ErrInvalidInput
 	}
 
 	match, _ := regexp.MatchString("^[a-fA-F0-9-]{36}$", token)
 	if !match {
-		return errors.New("invalid_token_format")
+		return errors.ErrInvalidInput
 	}
 
 	return nil

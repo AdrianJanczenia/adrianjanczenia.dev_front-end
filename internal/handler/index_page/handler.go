@@ -1,11 +1,13 @@
 package index_page
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
+	appErrors "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
 )
 
@@ -27,7 +29,7 @@ func NewHandler(processExecutor Executor, renderer renderer.Renderer) *Handler {
 
 func (h *Handler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		h.renderer.RenderError(w, "error", appErrors.ErrMethodNotAllowed, getLanguage(r), nil)
 		return
 	}
 
@@ -37,31 +39,12 @@ func (h *Handler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("ERROR: failed to execute index process: %s", strings.ReplaceAll(err.Error(), "\n", " "))
 
-		titles := map[string]string{
-			"pl": "Wystąpił błąd",
-			"en": "An error occurred",
-		}
-		messages := map[string]string{
-			"pl": "Pracuję nad rozwiązaniem problemu. Spróbuj ponownie później.",
-			"en": "I'm working on fixing the problem. Please try again later.",
+		var appErr *appErrors.AppError
+		if !errors.As(err, &appErr) {
+			appErr = appErrors.ErrServiceUnavailable
 		}
 
-		errorData := struct {
-			Lang    string
-			Title   string
-			Message string
-		}{
-			Lang:    lang,
-			Title:   titles[lang],
-			Message: messages[lang],
-		}
-
-		if templateData != nil && templateData.Content != nil && templateData.Content.Translations["error_title"] != "" {
-			errorData.Title = templateData.Content.Translations["error_title"]
-			errorData.Message = templateData.Content.Translations["error_message"]
-		}
-
-		h.renderer.Render(w, "error", errorData)
+		h.renderer.RenderError(w, "error", appErr, lang, nil)
 		return
 	}
 

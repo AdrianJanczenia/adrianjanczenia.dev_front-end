@@ -1,11 +1,13 @@
 package privacy_policy
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/data"
+	appErrors "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
 )
 
@@ -27,13 +29,13 @@ func NewHandler(processExecutor Executor, renderer renderer.Renderer) *Handler {
 
 func (h *Handler) HandlePrivacyPage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		h.renderer.RenderError(w, "error", appErrors.ErrMethodNotAllowed, "pl", nil)
 		return
 	}
 
-	lang := "en"
-	if strings.Contains(r.URL.Path, "polityka-prywatnosci") {
-		lang = "pl"
+	lang := "pl"
+	if strings.Contains(r.URL.Path, "privacy-policy") {
+		lang = "en"
 	}
 	if qLang := r.URL.Query().Get("lang"); qLang != "" {
 		lang = qLang
@@ -43,23 +45,12 @@ func (h *Handler) HandlePrivacyPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("ERROR: failed to execute privacy policy process: %s", strings.ReplaceAll(err.Error(), "\n", " "))
 
-		titles := map[string]string{"pl": "Wystąpił błąd", "en": "An error occurred"}
-		messages := map[string]string{
-			"pl": "Pracujemy nad rozwiązaniem problemu. Spróbuj ponownie później.",
-			"en": "We are working on fixing the problem. Please try again later.",
+		var appErr *appErrors.AppError
+		if !errors.As(err, &appErr) {
+			appErr = appErrors.ErrServiceUnavailable
 		}
 
-		errorData := struct {
-			Lang    string
-			Title   string
-			Message string
-		}{
-			Lang:    lang,
-			Title:   titles[lang],
-			Message: messages[lang],
-		}
-
-		h.renderer.Render(w, "error", errorData)
+		h.renderer.RenderError(w, "error", appErr, lang, nil)
 		return
 	}
 

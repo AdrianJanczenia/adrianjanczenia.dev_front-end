@@ -2,12 +2,16 @@ package gateway_service
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
+
+	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
 )
 
 type Client struct {
@@ -27,30 +31,40 @@ func (c *Client) GetPageContent(lang string) (*PageContent, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, errors.ErrInternalServerError
 	}
 
 	req.Header.Set("User-Agent", "PortfolioFrontend/1.0")
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := c.httpClient.Do(req)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute request: %w", err)
+		return nil, errors.ErrServiceUnavailable
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("api returned non-200 status: %d", resp.StatusCode)
+		var errorResp struct {
+			Error string `json:"error"`
+		}
+		json.NewDecoder(resp.Body).Decode(&errorResp)
+		if errorResp.Error != "" {
+			return nil, errors.FromSlug(errorResp.Error)
+		}
+		return nil, errors.FromHTTPStatus(resp.StatusCode)
 	}
 
 	contentType := resp.Header.Get("Content-Type")
 	if !strings.Contains(contentType, "application/json") {
-		return nil, fmt.Errorf("unexpected content type: got %s, want application/json", contentType)
+		return nil, errors.ErrInternalServerError
 	}
 
 	var pageContent PageContent
 	if err := json.NewDecoder(resp.Body).Decode(&pageContent); err != nil {
-		return nil, fmt.Errorf("failed to decode json response: %w", err)
+		return nil, errors.ErrInternalServerError
 	}
 
 	return &pageContent, nil
@@ -62,30 +76,41 @@ func (c *Client) RequestCVToken(password, lang string) (string, error) {
 		"lang":     lang,
 	})
 	if err != nil {
-		return "", err
+		return "", errors.ErrInternalServerError
 	}
 
-	req, err := http.NewRequest(http.MethodPost, c.baseURL+"/api/v1/cv-request", bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest("POST", c.baseURL+"/api/v1/cv-request", bytes.NewBuffer(reqBody))
 	if err != nil {
-		return "", err
+		return "", errors.ErrInternalServerError
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := c.httpClient.Do(req)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return "", err
+		return "", errors.ErrServiceUnavailable
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("status_%d", resp.StatusCode)
+		var errorResp struct {
+			Error string `json:"error"`
+		}
+		json.NewDecoder(resp.Body).Decode(&errorResp)
+		if errorResp.Error != "" {
+			return "", errors.FromSlug(errorResp.Error)
+		}
+		return "", errors.FromHTTPStatus(resp.StatusCode)
 	}
 
 	var result struct {
 		Token string `json:"token"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", err
+		return "", errors.ErrInternalServerError
 	}
 
 	return result.Token, nil
@@ -98,14 +123,35 @@ func (c *Client) DownloadCVStream(token, lang string) (io.ReadCloser, string, in
 
 	fullURL := fmt.Sprintf("%s/api/v1/download/cv?%s", c.baseURL, params.Encode())
 
-	resp, err := c.httpClient.Get(fullURL)
+	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
-		return nil, "", http.StatusInternalServerError, err
+		return nil, "", http.StatusInternalServerError, errors.ErrInternalServerError
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, "", http.StatusServiceUnavailable, errors.ErrServiceUnavailable
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		defer cancel()
+
+		var errorResp struct {
+			Error string `json:"error"`
+		}
+		json.NewDecoder(resp.Body).Decode(&errorResp)
 		resp.Body.Close()
-		return nil, "", resp.StatusCode, fmt.Errorf("status_%d", resp.StatusCode)
+
+		var appErr *errors.AppError
+		if errorResp.Error != "" {
+			appErr = errors.FromSlug(errorResp.Error)
+		} else {
+			appErr = errors.FromHTTPStatus(resp.StatusCode)
+		}
+
+		return nil, "", appErr.HTTPStatus, appErr
 	}
 
 	return resp.Body, resp.Header.Get("Content-Type"), resp.StatusCode, nil

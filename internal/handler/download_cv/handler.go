@@ -1,9 +1,11 @@
 package cv_download
 
 import (
+	"errors"
 	"io"
 	"net/http"
 
+	appErrors "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
@@ -35,13 +37,17 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	lang := r.URL.Query().Get("lang")
 
 	if token == "" || lang == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		h.renderErrorPage(w, lang, appErrors.ErrInvalidInput)
 		return
 	}
 
-	stream, contentType, status, err := h.processExecutor.Execute(token, lang)
+	stream, contentType, _, err := h.processExecutor.Execute(token, lang)
 	if err != nil {
-		h.renderErrorPage(w, lang, status)
+		var appErr *appErrors.AppError
+		if !errors.As(err, &appErr) {
+			appErr = appErrors.ErrCVExpired
+		}
+		h.renderErrorPage(w, lang, appErr)
 		return
 	}
 	defer stream.Close()
@@ -52,29 +58,8 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, stream)
 }
 
-func (h *Handler) renderErrorPage(w http.ResponseWriter, lang string, status int) {
-	content, err := h.contentClient.GetPageContent(lang)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	errorKey := "error_cv_server"
-	if status == http.StatusGone || status == http.StatusNotFound {
-		errorKey = "error_cv_expired"
-	}
-
-	data := struct {
-		Lang         string
-		Content      *gateway_service.PageContent
-		ErrorMessage string
-	}{
-		Lang:         lang,
-		Content:      content,
-		ErrorMessage: content.Translations[errorKey],
-	}
-
+func (h *Handler) renderErrorPage(w http.ResponseWriter, lang string, appErr *appErrors.AppError) {
+	content, _ := h.contentClient.GetPageContent(lang)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(status)
-	h.renderer.Render(w, "cv_error", data)
+	h.renderer.RenderError(w, "cv_error", appErr, lang, content)
 }

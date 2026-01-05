@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Content.Meta.Title}}</title>
+    <title>{{if .Content}}{{.Content.Meta.Title}}{{else}}Error{{end}}</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body class="error-centered-body">
 <div class="error-centered-container">
-    <h2 class="content-header"><span>{{index .Content.Translations "error_cv_header_error"}}::</span>{{index .Content.Translations "error_cv_header_msg"}}</h2>
+    <h2 class="content-header">
+        <span>{{if .Content}}{{index .Content.Translations "error_cv_header_error"}}{{else}}BŁĄD / ERROR{{end}}::</span>
+        {{if .Content}}{{index .Content.Translations "error_cv_header_msg"}}{{else}}CV{{end}}
+    </h2>
     <div class="styled-block">
-        <span class="key">{{index .Content.Translations "error_cv_status_key"}}</span>: <span class="string">"{{index .Content.Translations "error_cv_status_value"}}"</span>,
+        <span class="key">{{if .Content}}{{index .Content.Translations "error_cv_status_key"}}{{else}}status{{end}}</span>: <span class="string">"{{.HTTPStatus}}"</span>,
         <br>
-        <span class="key">{{index .Content.Translations "error_cv_message_key"}}</span>: <span class="string">"{{.ErrorMessage}}"</span>
+        <span class="key">{{if .Content}}{{index .Content.Translations "error_cv_message_key"}}{{else}}message{{end}}</span>: <span class="string">"{{.ErrorMessage}}"</span>
     </div>
     <div class="error-actions">
         <a href="/?lang={{.Lang}}" class="modal-btn">
-            {{index .Content.Translations "btn_back"}}
+            {{if .Content}}{{index .Content.Translations "btn_back"}}{{else}}Back{{end}}
         </a>
     </div>
 </div>

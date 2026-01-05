@@ -7,10 +7,14 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
+
+	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
+	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
 
 type Renderer interface {
 	Render(w http.ResponseWriter, name string, data any)
+	RenderError(w http.ResponseWriter, templateName string, appErr *errors.AppError, lang string, content *gateway_service.PageContent)
 }
 
 type templateRenderer struct {
@@ -70,4 +74,43 @@ func (r *templateRenderer) Render(w http.ResponseWriter, name string, data any) 
 	}
 
 	buf.WriteTo(w)
+}
+
+func (r *templateRenderer) RenderError(w http.ResponseWriter, templateName string, appErr *errors.AppError, lang string, content *gateway_service.PageContent) {
+	msg := ""
+	if content != nil && content.Translations != nil && content.Translations[appErr.Slug] != "" {
+		msg = content.Translations[appErr.Slug]
+	} else if trans, ok := errors.FallbackTranslations[lang]; ok {
+		msg = trans[appErr.Slug]
+	}
+
+	if msg == "" {
+		msg = errors.FallbackTranslations[lang]["error_cv_server"]
+	}
+
+	title := ""
+	if content != nil && content.Translations != nil && content.Translations["error_title"] != "" {
+		title = content.Translations["error_title"]
+	} else if lang == "pl" {
+		title = "Wystąpił błąd"
+	} else {
+		title = "An error occurred"
+	}
+
+	data := struct {
+		Lang         string
+		HTTPStatus   int
+		ErrorTitle   string
+		ErrorMessage string
+		Content      *gateway_service.PageContent
+	}{
+		Lang:         lang,
+		HTTPStatus:   appErr.HTTPStatus,
+		ErrorTitle:   title,
+		ErrorMessage: msg,
+		Content:      content,
+	}
+
+	w.WriteHeader(appErr.HTTPStatus)
+	r.Render(w, templateName, data)
 }

@@ -26,7 +26,7 @@ func NewProcess(v Validator, s Streamer) *Process {
 
 func (p *Process) Execute(token, lang string) (io.ReadCloser, string, int, error) {
 	if err := p.validator.Execute(token, lang); err != nil {
-		return nil, "", 400, err
+		return nil, "", 0, err
 	}
 	return p.streamer.Execute(token, lang)
 }
