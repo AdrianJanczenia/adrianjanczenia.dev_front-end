@@ -54,7 +54,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	defer stream.Close()
 
 	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Content-Disposition", "inline; filename=\"cv.pdf\"")
+	w.Header().Set("Content-Disposition", "inline; filename=\"cv_adrian_janczenia.pdf\"")
 
 	io.Copy(w, stream)
 }
