@@ -146,8 +146,14 @@
                 }
 
                 const proxyUrl = `/api/download/cv?token=${data.token}&lang=${lang}`;
+                const isMobile = window.matchMedia("(max-width: 768px)").matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-                window.open(proxyUrl, '_blank');
+                if (isMobile) {
+                    window.location.href = proxyUrl;
+                } else {
+                    window.open(proxyUrl, '_blank');
+                }
+
                 modal.classList.remove('open');
                 toggleScroll();
 
