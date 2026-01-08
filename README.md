@@ -25,14 +25,15 @@ The service features a decoupled Rendering Logic. Unlike standard implementation
 
 ### Security and UX Features
 - **Anti-Spam Protection**: Implements "Honeypot" mechanisms in forms to prevent automated bot submissions without requiring intrusive CAPTCHAs.
-- **Server-Side Translated Errors**: Error messages are mapped to user-friendly, localized strings before reaching the browser, ensuring a professional UX.
-- **Static Asset Optimization**: Efficiently serves optimized CSS and assets required for a modern look and feel.
+- **Server-Side Translated Errors**: Error messages are mapped to user-friendly, localized strings before reaching the browser.
+- **Mobile & Safari Optimization**: Includes specialized logic for detecting Safari and mobile devices to handle specific browser behaviors (Safe Area Insets, Smooth Scrolling, and Async Window management).
+- **Responsive Navigation**: A custom-built mobile menu with scroll-lock mechanisms ensuring a fluid experience on touch devices.
 
 ## Technical Specification
 
 - Go: 1.23+ (utilizing the latest html/template security features).
 - Server-Side Rendering: Native Go templates for zero-dependency rendering.
-- Tailwind CSS: For modern, responsive styling.
+- Modern CSS: Custom styling using CSS Variables and responsive design principles (no heavy frameworks).
 - Docker: Optimized multi-stage builds on Alpine Linux, specifically configured to include necessary web assets (HTML/CSS) in the final image.
 
 ## Environment Configuration
@@ -51,7 +52,7 @@ docker build -t frontend-service .
 go test -v ./...
 
 ## Performance Note
-By using Go's SSR instead of a heavy client-side framework, the application achieves near-instant First Contentful Paint (FCP) and eliminates the need for complex client-side state management, making it an ideal "business card" project.
+By using Go's SSR instead of a heavy client-side framework, the application achieves near-instant First Contentful Paint (FCP) and eliminates the need for complex client-side state management.
 
 ---
 Adrian Janczenia
