@@ -55,12 +55,32 @@
     });
 
     document.addEventListener('click', (e) => {
-        if (e.target.closest('a')) {
-            const link = e.target.closest('a');
-            const href = link.getAttribute('href');
-            if (href && (href.startsWith('#') || link.getAttribute('target') === '_blank' || link.classList.contains('cv-link'))) {
-                setTimeout(forceReset, 10);
+        const link = e.target.closest('a');
+        if (!link) return;
+
+        const href = link.getAttribute('href');
+
+        if (href && href.startsWith('#')) {
+            e.preventDefault();
+
+            if (navToggle && navToggle.checked) {
+                navToggle.checked = false;
+                toggleScroll();
             }
+
+            const targetId = href.substring(1);
+            const targetElement = targetId === 'top' ? body : document.getElementById(targetId);
+
+            if (targetElement) {
+                setTimeout(() => {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }, 50);
+            }
+            return;
+        }
+
+        if (href && (link.getAttribute('target') === '_blank' || link.classList.contains('cv-link'))) {
+            setTimeout(forceReset, 10);
         }
     });
 

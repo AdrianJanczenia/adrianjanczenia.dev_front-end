@@ -145,6 +145,7 @@
     padding: 2rem;
     font-family: var(--font-mono);
     font-size: 0.95rem;
+    overflow: hidden;
 }
 
 .styled-block .key { color: var(--key-color); }
@@ -433,6 +434,8 @@
 
 .privacy-item p {
     flex: 1;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .error-centered-body {
