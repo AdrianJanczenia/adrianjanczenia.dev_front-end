@@ -7,7 +7,6 @@
         overflow: hidden;
         height: 100dvh;
         width: 100%;
-        position: fixed;
     }
 
     .mobile-header {
@@ -84,6 +83,7 @@
         z-index: 999;
         padding-top: 6rem;
         overflow-y: auto;
+        touch-action: none;
     }
 
     .nav-toggle:checked ~ .mobile-nav-menu {
@@ -125,7 +125,7 @@
 
     .back-to-top {
         display: block;
-        bottom: calc(20px + env(safe-area-inset-bottom));
+        bottom: 90px;
         z-index: 2000;
     }
 

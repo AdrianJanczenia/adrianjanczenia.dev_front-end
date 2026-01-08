@@ -5,6 +5,11 @@
     const navToggle = document.getElementById('nav-toggle');
     const modal = document.getElementById('cv-modal');
 
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+        body.classList.add('is-safari');
+    }
+
     const errorTranslations = {
         "error_cv_auth": "{{index .Content.Translations "error_cv_auth"}}",
         "error_cv_expired": "{{index .Content.Translations "error_cv_expired"}}",
