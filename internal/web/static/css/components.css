@@ -377,6 +377,13 @@
     gap: 1.2rem;
 }
 
+#modal-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    width: 100%;
+}
+
 .modal-input {
     background-color: var(--sidebar-bg);
     border: 1px solid var(--border-color);
@@ -390,6 +397,7 @@
     line-height: 1.2;
     -webkit-appearance: none;
     appearance: none;
+    box-sizing: border-box;
 }
 
 .modal-input:focus {
@@ -399,11 +407,13 @@
 .captcha-container {
     display: flex;
     justify-content: center;
-    margin: 0.5rem 0;
+    margin: 0;
     background: var(--sidebar-bg);
     padding: 10px;
     border-radius: 4px;
     border: 1px solid var(--border-color);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .captcha-container img {
