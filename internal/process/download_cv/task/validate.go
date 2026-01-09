@@ -17,7 +17,7 @@ func (t *ValidateLinkTask) Execute(token, lang string) error {
 		return errors.ErrInvalidInput
 	}
 
-	match, _ := regexp.MatchString("^[a-fA-F0-9-]{36}$", token)
+	match, _ := regexp.MatchString("^[a-zA-Z0-9]+$", token)
 	if !match {
 		return errors.ErrInvalidInput
 	}

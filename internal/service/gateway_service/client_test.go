@@ -84,7 +84,7 @@ func TestClient_RequestCVToken(t *testing.T) {
 			defer ts.Close()
 
 			c := NewClient(&http.Client{}, ts.URL)
-			token, err := c.RequestCVToken(context.Background(), "pass", "pl")
+			token, err := c.RequestCVToken(context.Background(), "pass", "pl", "123")
 
 			if err != tt.wantErr {
 				t.Errorf("RequestCVToken() error = %v, wantErr %v", err, tt.wantErr)

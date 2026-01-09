@@ -70,10 +70,11 @@ func (c *Client) GetPageContent(ctx context.Context, lang string) (*PageContent,
 	return &pageContent, nil
 }
 
-func (c *Client) RequestCVToken(ctx context.Context, password, lang string) (string, error) {
+func (c *Client) RequestCVToken(ctx context.Context, password, lang, captchaId string) (string, error) {
 	reqBody, err := json.Marshal(map[string]string{
-		"password": password,
-		"lang":     lang,
+		"password":  password,
+		"lang":      lang,
+		"captchaId": captchaId,
 	})
 	if err != nil {
 		return "", errors.ErrInternalServerError
@@ -155,4 +156,121 @@ func (c *Client) DownloadCVStream(ctx context.Context, token, lang string) (io.R
 	}
 
 	return resp.Body, resp.Header.Get("Content-Type"), nil
+}
+
+func (c *Client) GetPow(ctx context.Context) (map[string]string, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", c.baseURL+"/api/v1/pow", nil)
+	if err != nil {
+		return nil, errors.ErrInternalServerError
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, errors.ErrServiceUnavailable
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp struct {
+			Error string `json:"error"`
+		}
+		json.NewDecoder(resp.Body).Decode(&errorResp)
+		if errorResp.Error != "" {
+			return nil, errors.FromSlug(errorResp.Error)
+		}
+		return nil, errors.FromHTTPStatus(resp.StatusCode)
+	}
+
+	var result map[string]string
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, errors.ErrInternalServerError
+	}
+
+	return result, nil
+}
+
+func (c *Client) GetCaptcha(ctx context.Context, seed, signature, nonce string) (map[string]string, error) {
+	reqBody, _ := json.Marshal(map[string]string{
+		"seed":      seed,
+		"signature": signature,
+		"nonce":     nonce,
+	})
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/api/v1/captcha", bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, errors.ErrInternalServerError
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, errors.ErrServiceUnavailable
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp struct {
+			Error string `json:"error"`
+		}
+		json.NewDecoder(resp.Body).Decode(&errorResp)
+		if errorResp.Error != "" {
+			return nil, errors.FromSlug(errorResp.Error)
+		}
+		return nil, errors.FromHTTPStatus(resp.StatusCode)
+	}
+
+	var result map[string]string
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, errors.ErrInternalServerError
+	}
+
+	return result, nil
+}
+
+func (c *Client) VerifyCaptcha(ctx context.Context, captchaID, captchaValue string) (string, error) {
+	reqBody, _ := json.Marshal(map[string]string{
+		"captchaId":    captchaID,
+		"captchaValue": captchaValue,
+	})
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/api/v1/captcha-verify", bytes.NewBuffer(reqBody))
+	if err != nil {
+		return "", errors.ErrInternalServerError
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", errors.ErrServiceUnavailable
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResp struct {
+			Error string `json:"error"`
+		}
+		json.NewDecoder(resp.Body).Decode(&errorResp)
+		if errorResp.Error != "" {
+			return "", errors.FromSlug(errorResp.Error)
+		}
+		return "", errors.FromHTTPStatus(resp.StatusCode)
+	}
+
+	var result struct {
+		CaptchaID string `json:"captchaId"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", errors.ErrInternalServerError
+	}
+
+	return result.CaptchaID, nil
 }

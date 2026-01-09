@@ -9,13 +9,14 @@ import (
 )
 
 type input struct {
-	Password string `json:"password"`
-	Lang     string `json:"lang"`
-	FullName string `json:"fullName"`
+	Password  string `json:"password"`
+	Lang      string `json:"lang"`
+	CaptchaID string `json:"captchaId"`
+	FullName  string `json:"fullName"`
 }
 
 type GetCVTokenProcess interface {
-	Process(ctx context.Context, password, lang string) (string, error)
+	Process(ctx context.Context, password, lang, captchaID string) (string, error)
 }
 
 type Handler struct {
@@ -47,12 +48,12 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if i.Password == "" || i.Lang == "" {
+	if i.Password == "" || i.Lang == "" || i.CaptchaID == "" {
 		errors.WriteJSON(w, errors.ErrInvalidInput)
 		return
 	}
 
-	token, err := h.process.Process(r.Context(), i.Password, i.Lang)
+	token, err := h.process.Process(r.Context(), i.Password, i.Lang, i.CaptchaID)
 	if err != nil {
 		errors.WriteJSON(w, err)
 		return

@@ -5,7 +5,7 @@ import (
 )
 
 type GatewayClient interface {
-	RequestCVToken(ctx context.Context, password, lang string) (string, error)
+	RequestCVToken(ctx context.Context, password, lang, captchaID string) (string, error)
 }
 
 type RequestCVTokenTask struct {
@@ -18,6 +18,6 @@ func NewRequestCVTokenTask(gatewayClient GatewayClient) *RequestCVTokenTask {
 	}
 }
 
-func (t *RequestCVTokenTask) Execute(ctx context.Context, password, lang string) (string, error) {
-	return t.gatewayClient.RequestCVToken(ctx, password, lang)
+func (t *RequestCVTokenTask) Execute(ctx context.Context, password, lang, captchaID string) (string, error) {
+	return t.gatewayClient.RequestCVToken(ctx, password, lang, captchaID)
 }

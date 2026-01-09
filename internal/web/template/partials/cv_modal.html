@@ -4,10 +4,18 @@
         <button class="modal-close" aria-label="Close">&times;</button>
         <h3 class="modal-header">{{index .Content.Translations "cv_modal_title"}}</h3>
         <form class="modal-form" id="cv-form">
-            <div class="hp-field">
-                <input type="text" id="cv-hp-name" name="fullName" tabindex="-1" autocomplete="off">
+            <div id="modal-fields">
+                <div class="hp-field">
+                    <input type="text" id="cv-hp-name" name="fullName" tabindex="-1" autocomplete="off">
+                </div>
+                <input type="password" id="cv-password" class="modal-input" placeholder="{{index .Content.Translations `cv_password_placeholder`}}" required>
+
+                <input type="text" id="cv-captcha" class="modal-input" placeholder="{{index .Content.Translations `cv_captcha_placeholder`}}" required autocomplete="off">
+                <div class="captcha-container" style="margin-bottom: 1.5rem;">
+                    <img id="captcha-img" src="" alt="CAPTCHA">
+                </div>
             </div>
-            <input type="password" id="cv-password" class="modal-input" placeholder="{{index .Content.Translations `cv_password_placeholder`}}" required>
+
             <button type="submit" class="modal-btn">
                 <span class="btn-text">{{index .Content.Translations "btn_get_link"}}</span>
                 <span class="spinner"></span>

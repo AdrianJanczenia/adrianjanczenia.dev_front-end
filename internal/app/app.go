@@ -11,18 +11,27 @@ import (
 	"time"
 
 	handlerDownloadCV "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/download_cv"
+	handlerGetCaptcha "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/get_captcha"
 	handlerGetCVToken "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/get_cv_token"
+	handlerGetPow "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/get_pow"
 	handlerIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/index_page"
 	handlerPrivacyPolicy "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/privacy_policy"
+	handlerVerifyCaptcha "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/verify_captcha"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
 	processDownloadCV "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/download_cv"
 	taskDownloadCVLink "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/download_cv/task"
+	processGetCaptcha "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_captcha"
+	taskGetCaptcha "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_captcha/task"
 	processGetCVToken "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_cv_token"
 	taskRequestCVToken "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_cv_token/task"
+	processGetPow "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_pow"
+	taskGetPow "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/get_pow/task"
 	processIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/index_page"
 	taskIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/index_page/task"
 	processPrivacyPolicy "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/privacy_policy"
 	taskPrivacyPolicy "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/privacy_policy/task"
+	processVerifyCaptcha "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/verify_captcha"
+	taskVerifyCaptcha "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/process/verify_captcha/task"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/registry"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
 )
@@ -67,6 +76,18 @@ func Build(cfg *registry.Config) (*App, error) {
 	downloadCVProcess := processDownloadCV.NewProcess(validateCVLinkTask, streamCVLinkTask)
 	downloadCVHandler := handlerDownloadCV.NewHandler(downloadCVProcess, gatewayService, pageRenderer)
 
+	getPowTask := taskGetPow.NewFetchPowTask(gatewayService)
+	getPowProcess := processGetPow.NewProcess(getPowTask)
+	getPowHandler := handlerGetPow.NewHandler(getPowProcess)
+
+	getCaptchaTask := taskGetCaptcha.NewFetchCaptchaTask(gatewayService)
+	getCaptchaProcess := processGetCaptcha.NewProcess(getCaptchaTask)
+	getCaptchaHandler := handlerGetCaptcha.NewHandler(getCaptchaProcess)
+
+	verifyCaptchaTask := taskVerifyCaptcha.NewVerifyCaptchaTask(gatewayService)
+	verifyCaptchaProcess := processVerifyCaptcha.NewProcess(verifyCaptchaTask)
+	verifyCaptchaHandler := handlerVerifyCaptcha.NewHandler(verifyCaptchaProcess)
+
 	mux := http.NewServeMux()
 	staticFs := http.FileServer(http.Dir("./internal/web/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", staticFs))
@@ -76,6 +97,9 @@ func Build(cfg *registry.Config) (*App, error) {
 	mux.HandleFunc("/polityka-prywatnosci", privacyHandler.Handle)
 	mux.HandleFunc("/api/cv-token", getCVTokenHandler.Handle)
 	mux.HandleFunc("/api/download/cv", downloadCVHandler.Handle)
+	mux.HandleFunc("/api/pow", getPowHandler.Handle)
+	mux.HandleFunc("/api/captcha", getCaptchaHandler.Handle)
+	mux.HandleFunc("/api/captcha-verify", verifyCaptchaHandler.Handle)
 
 	serverAddr := ":" + cfg.Server.Port
 	server := &http.Server{

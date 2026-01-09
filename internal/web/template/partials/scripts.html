@@ -3,6 +3,12 @@
     const body = document.body;
     const navToggle = document.getElementById('nav-toggle');
     const modal = document.getElementById('cv-modal');
+    const globalLoader = document.getElementById('global-loader');
+    const captchaImg = document.getElementById('captcha-img');
+    const modalError = document.getElementById('modal-error');
+    const modalFields = document.getElementById('modal-fields');
+
+    let currentCaptchaId = "";
 
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if (isSafari) {
@@ -14,12 +20,11 @@
         "error_cv_expired": "{{index .Content.Translations "error_cv_expired"}}",
         "error_cv_not_found": "{{index .Content.Translations "error_cv_not_found"}}",
         "error_cv_server": "{{index .Content.Translations "error_cv_server"}}",
-        "error_message": "{{index .Content.Translations "error_message"}}"
-    };
-
-    const fallbackMessages = {
-        "pl": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
-        "en": "An unexpected error occurred. Please try again."
+        "error_message": "{{index .Content.Translations "error_message"}}",
+        "error_captcha_invalid": "{{index .Content.Translations "error_captcha_invalid"}}",
+        "error_captcha_expired": "{{index .Content.Translations "error_captcha_expired"}}",
+        "error_captcha_not_found": "{{index .Content.Translations "error_captcha_not_found"}}",
+        "error_pow_failed": "{{index .Content.Translations "error_pow_failed"}}"
     };
 
     const toggleScroll = () => {
@@ -41,74 +46,114 @@
         }, 50);
     };
 
+    const calculatePoW = async (seed) => {
+        let nonce = 0;
+        const prefix = "0000";
+        while (true) {
+            const data = seed + nonce;
+            const msgUint8 = new TextEncoder().encode(data);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            if (hashHex.startsWith(prefix)) return nonce.toString();
+            nonce++;
+            if (nonce > 1000000) throw new Error('error_pow_failed');
+        }
+    };
+
+    const getChallenge = async () => {
+        try {
+            const powRes = await fetch('/api/pow');
+            const powData = await powRes.json();
+            if (!powRes.ok) throw new Error(powData.error || 'error_pow_failed');
+
+            const nonce = await calculatePoW(powData.seed);
+
+            const capRes = await fetch('/api/captcha', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({seed: powData.seed, signature: powData.signature, nonce: nonce})
+            });
+            const capData = await capRes.json();
+            if (!capRes.ok) throw new Error(capData.error || 'error_cv_server');
+
+            currentCaptchaId = capData.captchaId;
+            captchaImg.src = capData.captchaImg;
+            modalError.style.display = 'none';
+            modalFields.style.display = 'block';
+            return true;
+        } catch (e) {
+            modalError.textContent = errorTranslations[e.message] || e.message;
+            modalError.style.display = 'block';
+            modalFields.style.display = 'none';
+            return false;
+        }
+    };
+
     if (navToggle) navToggle.addEventListener('change', toggleScroll);
 
     window.addEventListener('pageshow', forceReset);
     window.addEventListener('popstate', forceReset);
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            forceReset();
-        }
+        if (document.visibilityState === 'visible') forceReset();
     });
 
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', async (e) => {
         const link = e.target.closest('a');
         if (!link) return;
 
-        const href = link.getAttribute('href');
+        if (link.classList.contains('cv-link')) {
+            e.preventDefault();
+            forceReset();
+            globalLoader.classList.add('visible');
 
+            modalError.style.display = 'none';
+            modalFields.style.display = 'block';
+            document.getElementById('cv-password').value = '';
+            document.getElementById('cv-captcha').value = '';
+
+            const success = await getChallenge();
+            globalLoader.classList.remove('visible');
+            modal.classList.add('open');
+            toggleScroll();
+            if (success) document.getElementById('cv-password').focus();
+            return;
+        }
+
+        const href = link.getAttribute('href');
         if (href && href.startsWith('#')) {
             e.preventDefault();
-
             if (navToggle && navToggle.checked) {
                 navToggle.checked = false;
                 toggleScroll();
             }
-
             const targetId = href.substring(1);
             const targetElement = targetId === 'top' ? body : document.getElementById(targetId);
-
             if (targetElement) {
                 setTimeout(() => {
-                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                    targetElement.scrollIntoView({behavior: 'smooth'});
                 }, 50);
             }
             return;
         }
 
-        if (href && (link.getAttribute('target') === '_blank' || link.classList.contains('cv-link'))) {
+        if (href && link.getAttribute('target') === '_blank') {
             setTimeout(forceReset, 10);
         }
     });
 
     const backToTopButton = document.querySelector('.back-to-top');
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 100) {
-            backToTopButton.classList.add('visible');
-        } else {
-            backToTopButton.classList.remove('visible');
-        }
+        if (window.scrollY > 100) backToTopButton.classList.add('visible');
+        else backToTopButton.classList.remove('visible');
     });
 
     const cvForm = document.getElementById('cv-form');
     if (cvForm) {
         const submitBtn = modal.querySelector('.modal-btn');
-        const errorMsg = document.getElementById('modal-error');
         const passInput = document.getElementById('cv-password');
+        const captchaInput = document.getElementById('cv-captcha');
         const hpInput = document.getElementById('cv-hp-name');
-
-        document.querySelectorAll('.cv-link').forEach(link => {
-            link.onclick = (e) => {
-                e.preventDefault();
-                forceReset();
-                modal.classList.add('open');
-                toggleScroll();
-                errorMsg.style.display = 'none';
-                errorMsg.textContent = '';
-                passInput.value = '';
-                passInput.focus();
-            };
-        });
 
         document.querySelector('.modal-close').onclick = () => {
             modal.classList.remove('open');
@@ -124,46 +169,58 @@
 
         cvForm.onsubmit = async (e) => {
             e.preventDefault();
+            if (hpInput.value !== "") return;
 
-            if (hpInput.value !== "") {
-                return;
-            }
-
-            const pass = passInput.value;
             const lang = document.documentElement.lang || 'pl';
-
             submitBtn.classList.add('loading');
             submitBtn.disabled = true;
-            errorMsg.style.display = 'none';
-            errorMsg.textContent = '';
+            modalError.style.display = 'none';
 
             try {
+                const verifyRes = await fetch('/api/captcha-verify', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({captchaId: currentCaptchaId, captchaValue: captchaInput.value})
+                });
+                const verifyData = await verifyRes.json();
+
+                if (!verifyRes.ok) {
+                    if (verifyData.error === 'error_captcha_expired' || verifyData.error === 'error_captcha_not_found') {
+                        modalError.textContent = errorTranslations[verifyData.error];
+                        modalError.style.display = 'block';
+                        modalFields.style.display = 'none';
+                        captchaInput.value = '';
+                        await getChallenge();
+                        return;
+                    }
+                    throw new Error(verifyData.error || 'error_captcha_invalid');
+                }
+
                 const res = await fetch(`/api/cv-token`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        password: pass,
+                        password: passInput.value,
                         lang: lang,
+                        captchaId: verifyData.captchaId,
                         fullName: hpInput.value
                     })
                 });
 
                 const data = await res.json();
-
                 if (!res.ok) {
-                    const slug = data.error || 'error_cv_server';
-                    let message = errorTranslations[slug];
-
-                    if (!message || message === "") {
-                        message = fallbackMessages[lang] || fallbackMessages['en'];
+                    if (data.error === 'error_captcha_expired' || data.error === 'error_captcha_not_found') {
+                        modalError.textContent = errorTranslations[data.error];
+                        modalError.style.display = 'block';
+                        modalFields.style.display = 'none';
+                        captchaInput.value = '';
+                        await getChallenge();
+                        return;
                     }
-
-                    throw new Error(message);
+                    throw new Error(data.error || 'error_cv_server');
                 }
 
-                if (!data.token) throw new Error(fallbackMessages[lang] || fallbackMessages['en']);
+                if (!data.token) throw new Error('error_cv_server');
 
                 if (data.token === "token") {
                     modal.classList.remove('open');
@@ -174,18 +231,14 @@
                 const proxyUrl = `/api/download/cv?token=${data.token}&lang=${lang}`;
                 const isMobile = window.matchMedia("(max-width: 768px)").matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-                if (isMobile) {
-                    window.location.href = proxyUrl;
-                } else {
-                    window.open(proxyUrl, '_blank');
-                }
+                if (isMobile) window.location.href = proxyUrl;
+                else window.open(proxyUrl, '_blank');
 
                 modal.classList.remove('open');
                 toggleScroll();
-
             } catch (err) {
-                errorMsg.textContent = err.message;
-                errorMsg.style.display = 'block';
+                modalError.textContent = errorTranslations[err.message] || err.message;
+                modalError.style.display = 'block';
             } finally {
                 submitBtn.classList.remove('loading');
                 submitBtn.disabled = false;
