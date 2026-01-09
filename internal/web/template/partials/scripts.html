@@ -169,6 +169,9 @@
 
         cvForm.onsubmit = async (e) => {
             e.preventDefault();
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
             if (hpInput.value !== "") return;
 
             const lang = document.documentElement.lang || 'pl';
