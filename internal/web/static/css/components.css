@@ -388,13 +388,14 @@
     background-color: var(--sidebar-bg);
     border: 1px solid var(--border-color);
     color: var(--string-color);
-    padding: 0.9rem;
+    padding: 0 0.9rem;
     border-radius: 4px;
     font-family: var(--font-mono);
     outline: none;
     font-size: 1rem;
     width: 100%;
-    line-height: 1.2;
+    height: 3.2rem;
+    line-height: 3.2rem;
     -webkit-appearance: none;
     appearance: none;
     box-sizing: border-box;
