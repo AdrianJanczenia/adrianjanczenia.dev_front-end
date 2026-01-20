@@ -27,7 +27,10 @@ func New(templateMap map[string][]string) (Renderer, error) {
 
 	funcs := template.FuncMap{
 		"join": func(s []string) string {
-			return strings.Join(s, ", ")
+			if len(s) == 0 {
+				return ""
+			}
+			return "\"" + strings.Join(s, "\", \"") + "\""
 		},
 		"sub": func(a, b int) int {
 			return a - b
