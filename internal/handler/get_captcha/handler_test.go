@@ -32,14 +32,14 @@ func TestHandler_GetCaptcha(t *testing.T) {
 			name:       "method not allowed",
 			method:     http.MethodGet,
 			wantStatus: http.StatusMethodNotAllowed,
-			wantBody:   map[string]string{"error": "error_message"},
+			wantBody:   map[string]string{"error": "error_method_not_allowed"},
 		},
 		{
 			name:       "invalid input",
 			method:     http.MethodPost,
 			body:       "invalid-json",
 			wantStatus: http.StatusBadRequest,
-			wantBody:   map[string]string{"error": "error_message"},
+			wantBody:   map[string]string{"error": "error_invalid_input"},
 		},
 		{
 			name:   "process error",
@@ -53,7 +53,7 @@ func TestHandler_GetCaptcha(t *testing.T) {
 				return nil, errors.New("fail")
 			},
 			wantStatus: http.StatusInternalServerError,
-			wantBody:   map[string]string{"error": "error_cv_server"},
+			wantBody:   map[string]string{"error": "error_internal"},
 		},
 		{
 			name:   "success",

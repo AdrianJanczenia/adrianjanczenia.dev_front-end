@@ -1,58 +1,41 @@
-# Adrian Janczenia - Front-End Service
+# Front-end service
 
-The **Front-End Service** is the presentation layer of the portfolio ecosystem. It is a high-performance web application built with Go, utilizing Server-Side Rendering (SSR) to deliver a fast, SEO-friendly, and accessible user experience.
+This Go service renders the portfolio and privacy pages with `html/template`. It gets localized content and CV-related data from the gateway over HTTP. A small amount of browser JavaScript runs the proof-of-work (PoW) solver and CV form; there is no client-side application framework.
 
-## Service Role
+## Routes and CV flow
 
-This service manages the user-facing part of the application. Its primary responsibilities include:
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/` | Render the portfolio page. |
+| `GET` | `/privacy-policy`, `/polityka-prywatnosci` | Render the privacy page. |
+| `GET` | `/api/pow` | Fetch a signed PoW challenge through the gateway. |
+| `POST` | `/api/captcha` | Submit a solved PoW and fetch an image CAPTCHA. |
+| `POST` | `/api/captcha-verify` | Verify the entered CAPTCHA answer. |
+| `POST` | `/api/cv-token` | Request a CV download token. |
+| `GET` | `/api/download/cv` | Stream the PDF for a token and language. |
 
-- **Dynamic Server-Side Rendering**: Generating HTML on the fly using Go's native 'html/template' engine for optimal performance and security.
-- **Localization (i18n)**: Handling multi-language support by injecting content retrieved from the microservices into the templates.
-- **Gateway Integration**: Orchestrating communication with the Gateway Service to fetch page data and handle CV access requests.
-- **Interactive Captcha Management**: Handling the Proof of Work (PoW) process and Captcha image verification directly within the UI.
+Unknown page paths render an HTML 404 page using the same visual layout as CV errors. Unknown `/api` paths also render this page when the request prefers `text/html`, as browser navigation does; API requests receive a JSON 404 error slug. This includes misspelled CV download paths. Polish is the default; `?lang=en` selects English, and the error page offers a PL/EN switch.
 
-## Architecture and Design
+The browser solves PoW, displays the CAPTCHA image, verifies the answer, and then requests a CV token with the chosen language and password. The download request passes through the front end, gateway, and content service. The download handler accepts only `GET`, rejects missing token or language, and sends `Cache-Control: no-store` and `Referrer-Policy: no-referrer`.
 
-The service follows the system-wide architectural standards, ensuring consistency and maintainability.
+The browser solver currently requires four leading zero hexadecimal characters in the SHA-256 hash of `seed + nonce`. Keep this value aligned with the CAPTCHA service's configured difficulty. The form also contains a hidden honeypot field; normal requests leave it empty.
 
-### Layered Pattern: Handler -> Process -> Task
-1. Handler: Manages HTTP requests, parses form data, and selects the appropriate templates for rendering.
-2. Process: Orchestrates high-level UI logic, such as coordinating content fetching with error handling fallback.
-3. Task / Service: Executes atomic operations like calling the Gateway API or managing internal template data mapping.
+## Structure and configuration
 
-### Advanced Rendering Engine
-The service features a decoupled Rendering Logic. The renderer uses a dynamic template mapping system, allowing for flexible layout management and professional error page rendering (e.g., localized 404/500 pages) without hardcoded file paths in the handlers.
+Handlers accept HTTP requests, processes coordinate page or API flows, and small service interfaces call the gateway. The renderer loads layouts and partials from `internal/web/template/`; styles and images are in `internal/web/static/`. Dependencies and routes are assembled in `internal/app` without a global configuration variable.
 
-### Security and UX Features
-- **PoW and Captcha Integration**: Integrated anti-bot protection. If a Captcha session expires, the form automatically refreshes the challenge without closing the modal popup.
-- **Enhanced CV Modal**: Optimized field layout (Password, Captcha Input, Captcha Image) for better readability and user flow.
-- **Reliable Spinners**: CSS logic ensuring spinner animations restart every time a modal is opened or the global loader is activated.
-- **Mobile & Safari Optimization**: Specialized logic for detecting Safari and mobile devices to handle specific browser behaviors like Safe Area Insets and smooth scrolling.
+The templates render localized content and error pages. The CV modal refreshes an expired CAPTCHA challenge, and the browser opens the PDF link differently on mobile and desktop. These browser behaviors live in `internal/web/template/partials/scripts.html`.
 
-## Technical Specification
+Inter and Fira Code are served from `internal/web/static/fonts/` as local WOFF2 files. Their OFL license notices are stored alongside them. The browser does not need to contact Google Fonts. The client accepts downstream errors only when a recognized JSON slug matches its HTTP status; a missing or inconsistent error payload becomes `502 error_bad_gateway`. The old `error_message` slug remains accepted with its HTTP status during a service rollout.
 
-- Go: 1.23+
-- SSR: Native Go templates for zero-dependency rendering.
-- Modern CSS: Custom styling using CSS Variables and responsive design principles.
-- Unit Tests: Full coverage for PoW fetching, Captcha fetching, and verification processes.
+The module requires Go 1.25 (see `go.mod`). `APP_ENV=production` selects `config/production/config.yml`; otherwise the local file is used. `GATEWAY_URL` can override the gateway address in YAML. Both configurations set a 20-second HTTP server write timeout. The gateway client uses per-operation deadlines for ordinary requests; PDF streaming follows the incoming request context instead of a fixed client-wide body timeout.
 
-## Environment Configuration
+From the repository root, start the gateway, provide its address in configuration, and run `go run .`. The `Dockerfile` is available for container builds.
 
-| Variable | Description |
-|----------|-------------|
-| APP_ENV | Runtime environment (local/production) |
-| GATEWAY_URL | The internal or external URL of the Gateway Service |
+## Verification
 
-## Development and Deployment
+```sh
+go test -race ./...
+```
 
-### Build Optimized Docker Image
-docker build -t frontend-service .
-
-### Execute Unit Tests
-go test -v ./...
-
-## Performance Note
-By using Go's SSR instead of a heavy client-side framework, the application achieves near-instant First Contentful Paint (FCP) and eliminates the need for complex client-side state management.
-
----
-Adrian Janczenia
+These tests cover handlers, processes, rendering, and gateway client behavior. They do not start the full service stack or exercise the browser's JavaScript.

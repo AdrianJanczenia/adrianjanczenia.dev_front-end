@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"io"
+	"log"
 	"net/http"
+	"time"
 
 	appErrors "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/renderer"
@@ -34,6 +36,14 @@ func NewHandler(process DownloadCVProcess, contentClient ContentProvider, render
 }
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Referrer-Policy", "no-referrer")
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
+		appErrors.WriteJSON(w, appErrors.ErrMethodNotAllowed)
+		return
+	}
+
 	token := r.URL.Query().Get("token")
 	lang := r.URL.Query().Get("lang")
 
@@ -56,7 +66,10 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Disposition", "inline; filename=\"cv_adrian_janczenia.pdf\"")
 
-	io.Copy(w, stream)
+	_ = http.NewResponseController(w).SetWriteDeadline(time.Time{})
+	if _, err := io.Copy(w, stream); err != nil {
+		log.Printf("ERROR: CV stream interrupted: %v", err)
+	}
 }
 
 func (h *Handler) renderErrorPage(ctx context.Context, w http.ResponseWriter, lang string, appErr *appErrors.AppError) {

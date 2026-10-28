@@ -31,6 +31,7 @@ func NewHandler(process GetCVTokenProcess) *Handler {
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
 		errors.WriteJSON(w, errors.ErrMethodNotAllowed)
 		return
 	}

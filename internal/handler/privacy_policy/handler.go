@@ -29,17 +29,18 @@ func NewHandler(process PrivacyPolicyProcess, renderer renderer.Renderer) *Handl
 }
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		h.renderer.RenderError(w, "error", appErrors.ErrMethodNotAllowed, "pl", nil)
-		return
-	}
-
 	lang := "pl"
-	if strings.Contains(r.URL.Path, "privacy-policy") {
+	if r.URL.Path == "/privacy-policy" {
 		lang = "en"
 	}
 	if qLang := r.URL.Query().Get("lang"); qLang != "" {
 		lang = qLang
+	}
+
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
+		h.renderer.RenderError(w, "error", appErrors.ErrMethodNotAllowed, lang, nil)
+		return
 	}
 
 	templateData, err := h.process.Process(r.Context(), lang)

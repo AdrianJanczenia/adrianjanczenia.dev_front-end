@@ -77,4 +77,23 @@ func TestTemplateRenderer_RenderError(t *testing.T) {
 			t.Errorf("expected %s, got %s", expectedMsg, w.Body.String())
 		}
 	})
+
+	t.Run("uses a readable fallback for an unknown language", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r.RenderError(w, "error", errors.ErrRouteNotFound, "xx", nil)
+		if w.Code != http.StatusNotFound {
+			t.Fatalf("expected 404, got %d", w.Code)
+		}
+		if want := errors.FallbackTranslations["pl"]["error_route_not_found"]; w.Body.String() != want {
+			t.Errorf("expected %q, got %q", want, w.Body.String())
+		}
+	})
+
+	t.Run("template failure returns 500 before writing error status", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r.RenderError(w, "missing", errors.ErrRouteNotFound, "pl", nil)
+		if w.Code != http.StatusInternalServerError {
+			t.Errorf("expected 500, got %d", w.Code)
+		}
+	})
 }

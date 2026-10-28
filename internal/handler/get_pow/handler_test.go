@@ -30,7 +30,7 @@ func TestHandler_GetPow(t *testing.T) {
 			name:       "method not allowed",
 			method:     http.MethodPost,
 			wantStatus: http.StatusMethodNotAllowed,
-			wantBody:   map[string]string{"error": "error_message"},
+			wantBody:   map[string]string{"error": "error_method_not_allowed"},
 		},
 		{
 			name:   "process error",
@@ -39,7 +39,7 @@ func TestHandler_GetPow(t *testing.T) {
 				return nil, errors.New("internal failure")
 			},
 			wantStatus: http.StatusInternalServerError,
-			wantBody:   map[string]string{"error": "error_cv_server"},
+			wantBody:   map[string]string{"error": "error_internal"},
 		},
 		{
 			name:   "success",
@@ -64,6 +64,9 @@ func TestHandler_GetPow(t *testing.T) {
 
 			if rr.Code != tt.wantStatus {
 				t.Errorf("Handle() status = %v, want %v", rr.Code, tt.wantStatus)
+			}
+			if tt.wantStatus == http.StatusMethodNotAllowed && rr.Header().Get("Allow") != http.MethodGet {
+				t.Errorf("Allow = %q, want GET", rr.Header().Get("Allow"))
 			}
 
 			var gotBody map[string]string

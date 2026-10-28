@@ -12,9 +12,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("FATAL: could not load configuration: %v", err)
 	}
-	registry.Cfg = cfg
-
-	application, err := app.Build(registry.Cfg)
+	application, err := app.Build(cfg)
 	if err != nil {
 		log.Fatalf("FATAL: could not build application: %v", err)
 	}

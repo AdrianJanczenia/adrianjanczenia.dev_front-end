@@ -546,6 +546,12 @@
     margin-top: 2.5rem;
 }
 
+.error-lang-switcher {
+    justify-content: center;
+    padding-left: 0;
+    margin-top: 2rem;
+}
+
 .hp-field {
     opacity: 0;
     position: absolute;

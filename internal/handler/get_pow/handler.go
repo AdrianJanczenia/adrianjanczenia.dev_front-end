@@ -22,6 +22,7 @@ func NewHandler(p GetPowProcess) *Handler {
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
 		errors.WriteJSON(w, errors.ErrMethodNotAllowed)
 		return
 	}

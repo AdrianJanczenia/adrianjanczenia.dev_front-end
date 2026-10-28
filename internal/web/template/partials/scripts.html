@@ -20,11 +20,24 @@
         "error_cv_expired": "{{index .Content.Translations "error_cv_expired"}}",
         "error_cv_not_found": "{{index .Content.Translations "error_cv_not_found"}}",
         "error_cv_server": "{{index .Content.Translations "error_cv_server"}}",
+        "error_internal": "{{index .Content.Translations "error_internal"}}",
         "error_message": "{{index .Content.Translations "error_message"}}",
+        "error_service_unavailable": "{{index .Content.Translations "error_service_unavailable"}}",
+        "error_bad_gateway": "{{index .Content.Translations "error_bad_gateway"}}",
+        "error_method_not_allowed": "{{index .Content.Translations "error_method_not_allowed"}}",
+        "error_invalid_input": "{{index .Content.Translations "error_invalid_input"}}",
+        "error_unsupported_language": "{{index .Content.Translations "error_unsupported_language"}}",
+        "error_content_not_found": "{{index .Content.Translations "error_content_not_found"}}",
+        "error_captcha_server": "{{index .Content.Translations "error_captcha_server"}}",
         "error_captcha_invalid": "{{index .Content.Translations "error_captcha_invalid"}}",
+        "error_captcha_not_solved": "{{index .Content.Translations "error_captcha_not_solved"}}",
         "error_captcha_expired": "{{index .Content.Translations "error_captcha_expired"}}",
         "error_captcha_not_found": "{{index .Content.Translations "error_captcha_not_found"}}",
-        "error_pow_failed": "{{index .Content.Translations "error_pow_failed"}}"
+        "error_pow_failed": "{{index .Content.Translations "error_pow_failed"}}",
+        "error_pow_signature": "{{index .Content.Translations "error_pow_signature"}}",
+        "error_pow_work": "{{index .Content.Translations "error_pow_work"}}",
+        "error_pow_double_spend": "{{index .Content.Translations "error_pow_double_spend"}}",
+        "error_pow_expired": "{{index .Content.Translations "error_pow_expired"}}"
     };
 
     const toggleScroll = () => {
@@ -75,7 +88,7 @@
                 body: JSON.stringify({seed: powData.seed, signature: powData.signature, nonce: nonce})
             });
             const capData = await capRes.json();
-            if (!capRes.ok) throw new Error(capData.error || 'error_cv_server');
+            if (!capRes.ok) throw new Error(capData.error || 'error_internal');
 
             currentCaptchaId = capData.captchaId;
             captchaImg.src = capData.captchaImg;
@@ -83,7 +96,7 @@
             modalFields.style.display = 'block';
             return true;
         } catch (e) {
-            modalError.textContent = errorTranslations[e.message] || e.message;
+            modalError.textContent = errorTranslations[e.message] || errorTranslations.error_service_unavailable || errorTranslations.error_message;
             modalError.style.display = 'block';
             modalFields.style.display = 'none';
             return false;
@@ -240,7 +253,7 @@
                 modal.classList.remove('open');
                 toggleScroll();
             } catch (err) {
-                modalError.textContent = errorTranslations[err.message] || err.message;
+                modalError.textContent = errorTranslations[err.message] || errorTranslations.error_service_unavailable || errorTranslations.error_message;
                 modalError.style.display = 'block';
             } finally {
                 submitBtn.classList.remove('loading');

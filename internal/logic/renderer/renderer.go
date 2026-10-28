@@ -2,6 +2,7 @@ package renderer
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -48,12 +49,10 @@ func New(templateMap map[string][]string) (Renderer, error) {
 	return r, nil
 }
 
-func (r *templateRenderer) Render(w http.ResponseWriter, name string, data any) {
+func (r *templateRenderer) renderBytes(name string, data any) ([]byte, error) {
 	tmpl, ok := r.templates[name]
 	if !ok {
-		log.Printf("ERROR: template %s does not exist", name)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		return nil, fmt.Errorf("template %s does not exist", name)
 	}
 
 	executeTmpl := "base"
@@ -63,49 +62,81 @@ func (r *templateRenderer) Render(w http.ResponseWriter, name string, data any) 
 
 	buf := new(bytes.Buffer)
 	if err := tmpl.ExecuteTemplate(buf, executeTmpl, data); err != nil {
-		log.Printf("ERROR: could not execute template %s: %v", name, err)
+		return nil, fmt.Errorf("execute template %s: %w", name, err)
+	}
+	return buf.Bytes(), nil
+}
+
+func (r *templateRenderer) Render(w http.ResponseWriter, name string, data any) {
+	body, err := r.renderBytes(name, data)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	buf.WriteTo(w)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write(body)
 }
 
 func (r *templateRenderer) RenderError(w http.ResponseWriter, templateName string, appErr *errors.AppError, lang string, content *gateway_service.PageContent) {
+	if appErr == nil {
+		appErr = errors.ErrInternalServerError
+	}
+	if lang != "en" {
+		lang = "pl"
+	}
+	fallback := errors.FallbackTranslations[lang]
 	msg := ""
 	if content != nil && content.Translations != nil && content.Translations[appErr.Slug] != "" {
 		msg = content.Translations[appErr.Slug]
-	} else if trans, ok := errors.FallbackTranslations[lang]; ok {
-		msg = trans[appErr.Slug]
+	} else {
+		msg = fallback[appErr.Slug]
 	}
 
 	if msg == "" {
-		msg = errors.FallbackTranslations[lang]["error_cv_server"]
+		msg = fallback["error_internal"]
 	}
 
-	title := ""
-	if content != nil && content.Translations != nil && content.Translations["error_title"] != "" {
-		title = content.Translations["error_title"]
-	} else if lang == "pl" {
-		title = "Wystąpił błąd"
-	} else {
-		title = "An error occurred"
+	titleKey := "error_title"
+	if appErr.Slug == errors.ErrRouteNotFound.Slug {
+		titleKey = "error_route_title"
+	}
+	title := fallback[titleKey]
+	if content != nil && content.Translations != nil && content.Translations[titleKey] != "" {
+		title = content.Translations[titleKey]
 	}
 
 	data := struct {
-		Lang         string
-		HTTPStatus   int
-		ErrorTitle   string
-		ErrorMessage string
-		Content      *gateway_service.PageContent
+		Lang          string
+		HTTPStatus    int
+		ErrorTitle    string
+		ErrorMessage  string
+		HomeLabel     string
+		ErrorHeader   string
+		StatusKey     string
+		MessageKey    string
+		LanguageLabel string
+		Content       *gateway_service.PageContent
 	}{
-		Lang:         lang,
-		HTTPStatus:   appErr.HTTPStatus,
-		ErrorTitle:   title,
-		ErrorMessage: msg,
-		Content:      content,
+		Lang:          lang,
+		HTTPStatus:    appErr.HTTPStatus,
+		ErrorTitle:    title,
+		ErrorMessage:  msg,
+		HomeLabel:     fallback["error_home"],
+		ErrorHeader:   fallback["error_header"],
+		StatusKey:     fallback["error_status_key"],
+		MessageKey:    fallback["error_message_key"],
+		LanguageLabel: fallback["error_language_label"],
+		Content:       content,
 	}
 
+	body, err := r.renderBytes(templateName, data)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(appErr.HTTPStatus)
-	r.Render(w, templateName, data)
+	_, _ = w.Write(body)
 }

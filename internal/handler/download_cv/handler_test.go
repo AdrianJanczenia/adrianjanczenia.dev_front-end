@@ -38,6 +38,20 @@ func (m *mockRenderer) RenderError(w http.ResponseWriter, templateName string, a
 }
 
 func TestHandler_DownloadCV(t *testing.T) {
+	t.Run("HEAD does not redeem token", func(t *testing.T) {
+		h := NewHandler(nil, nil, nil)
+		w := httptest.NewRecorder()
+		h.Handle(w, httptest.NewRequest(http.MethodHead, "/api/download/cv?token=tok&lang=pl", nil))
+		if w.Code != http.StatusMethodNotAllowed {
+			t.Fatalf("status = %d", w.Code)
+		}
+		if got := w.Header().Get("Allow"); got != http.MethodGet {
+			t.Errorf("Allow = %q, want GET", got)
+		}
+		if !strings.Contains(w.Body.String(), `"error":"error_method_not_allowed"`) {
+			t.Errorf("unexpected JSON error: %q", w.Body.String())
+		}
+	})
 	t.Run("missing params calls render error", func(t *testing.T) {
 		var errorCalled bool
 		r := &mockRenderer{renderErrorFunc: func(w http.ResponseWriter, tn string, ae *appErrors.AppError, l string, c *gateway_service.PageContent) {

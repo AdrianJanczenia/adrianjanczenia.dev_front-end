@@ -1,7 +1,7 @@
 server:
   port: "8080"
   readTimeoutSeconds: 5
-  writeTimeoutSeconds: 10
+  writeTimeoutSeconds: 20
 
 infrastructure:
   retry:

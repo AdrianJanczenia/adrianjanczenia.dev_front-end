@@ -30,6 +30,7 @@ func NewHandler(process IndexPageProcess, renderer renderer.Renderer) *Handler {
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
 		h.renderer.RenderError(w, "error", appErrors.ErrMethodNotAllowed, getLanguage(r), nil)
 		return
 	}

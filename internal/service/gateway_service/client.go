@@ -27,12 +27,14 @@ func NewClient(httpClient *http.Client, baseURL string) *Client {
 }
 
 func (c *Client) GetPageContent(ctx context.Context, lang string) (*PageContent, error) {
-	url := fmt.Sprintf("%s/api/v1/content?lang=%s", c.baseURL, lang)
+	params := url.Values{}
+	params.Set("lang", lang)
+	fullURL := fmt.Sprintf("%s/api/v1/content?%s", c.baseURL, params.Encode())
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullURL, nil)
 	if err != nil {
 		return nil, errors.ErrInternalServerError
 	}
@@ -47,14 +49,7 @@ func (c *Client) GetPageContent(ctx context.Context, lang string) (*PageContent,
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		var errorResp struct {
-			Error string `json:"error"`
-		}
-		json.NewDecoder(resp.Body).Decode(&errorResp)
-		if errorResp.Error != "" {
-			return nil, errors.FromSlug(errorResp.Error)
-		}
-		return nil, errors.FromHTTPStatus(resp.StatusCode)
+		return nil, decodeErrorResponse(resp)
 	}
 
 	contentType := resp.Header.Get("Content-Type")
@@ -70,17 +65,17 @@ func (c *Client) GetPageContent(ctx context.Context, lang string) (*PageContent,
 	return &pageContent, nil
 }
 
-func (c *Client) RequestCVToken(ctx context.Context, password, lang, captchaId string) (string, error) {
+func (c *Client) RequestCVToken(ctx context.Context, password, lang, captchaID string) (string, error) {
 	reqBody, err := json.Marshal(map[string]string{
 		"password":  password,
 		"lang":      lang,
-		"captchaId": captchaId,
+		"captchaId": captchaID,
 	})
 	if err != nil {
 		return "", errors.ErrInternalServerError
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/api/v1/cv-request", bytes.NewBuffer(reqBody))
@@ -97,14 +92,7 @@ func (c *Client) RequestCVToken(ctx context.Context, password, lang, captchaId s
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		var errorResp struct {
-			Error string `json:"error"`
-		}
-		json.NewDecoder(resp.Body).Decode(&errorResp)
-		if errorResp.Error != "" {
-			return "", errors.FromSlug(errorResp.Error)
-		}
-		return "", errors.FromHTTPStatus(resp.StatusCode)
+		return "", decodeErrorResponse(resp)
 	}
 
 	var result struct {
@@ -112,6 +100,9 @@ func (c *Client) RequestCVToken(ctx context.Context, password, lang, captchaId s
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return "", errors.ErrInternalServerError
+	}
+	if result.Token == "" {
+		return "", errors.ErrServiceUnavailable
 	}
 
 	return result.Token, nil
@@ -124,34 +115,21 @@ func (c *Client) DownloadCVStream(ctx context.Context, token, lang string) (io.R
 
 	fullURL := fmt.Sprintf("%s/api/v1/download/cv?%s", c.baseURL, params.Encode())
 
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-
-	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullURL, nil)
 	if err != nil {
 		return nil, "", errors.ErrInternalServerError
 	}
 
-	resp, err := c.httpClient.Do(req)
+	streamClient := *c.httpClient
+	streamClient.Timeout = 0
+	resp, err := streamClient.Do(req)
 	if err != nil {
 		return nil, "", errors.ErrServiceUnavailable
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		defer cancel()
-
-		var errorResp struct {
-			Error string `json:"error"`
-		}
-		json.NewDecoder(resp.Body).Decode(&errorResp)
+		appErr := decodeErrorResponse(resp)
 		resp.Body.Close()
-
-		var appErr *errors.AppError
-		if errorResp.Error != "" {
-			appErr = errors.FromSlug(errorResp.Error)
-		} else {
-			appErr = errors.FromHTTPStatus(resp.StatusCode)
-		}
-
 		return nil, "", appErr
 	}
 
@@ -174,14 +152,7 @@ func (c *Client) GetPow(ctx context.Context) (map[string]string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		var errorResp struct {
-			Error string `json:"error"`
-		}
-		json.NewDecoder(resp.Body).Decode(&errorResp)
-		if errorResp.Error != "" {
-			return nil, errors.FromSlug(errorResp.Error)
-		}
-		return nil, errors.FromHTTPStatus(resp.StatusCode)
+		return nil, decodeErrorResponse(resp)
 	}
 
 	var result map[string]string
@@ -215,14 +186,7 @@ func (c *Client) GetCaptcha(ctx context.Context, seed, signature, nonce string) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		var errorResp struct {
-			Error string `json:"error"`
-		}
-		json.NewDecoder(resp.Body).Decode(&errorResp)
-		if errorResp.Error != "" {
-			return nil, errors.FromSlug(errorResp.Error)
-		}
-		return nil, errors.FromHTTPStatus(resp.StatusCode)
+		return nil, decodeErrorResponse(resp)
 	}
 
 	var result map[string]string
@@ -255,14 +219,7 @@ func (c *Client) VerifyCaptcha(ctx context.Context, captchaID, captchaValue stri
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		var errorResp struct {
-			Error string `json:"error"`
-		}
-		json.NewDecoder(resp.Body).Decode(&errorResp)
-		if errorResp.Error != "" {
-			return "", errors.FromSlug(errorResp.Error)
-		}
-		return "", errors.FromHTTPStatus(resp.StatusCode)
+		return "", decodeErrorResponse(resp)
 	}
 
 	var result struct {
@@ -273,4 +230,21 @@ func (c *Client) VerifyCaptcha(ctx context.Context, captchaID, captchaValue stri
 	}
 
 	return result.CaptchaID, nil
+}
+
+func decodeErrorResponse(resp *http.Response) *errors.AppError {
+	data, err := io.ReadAll(io.LimitReader(resp.Body, 4097))
+	if err != nil || len(data) > 4096 {
+		return errors.ErrBadGateway
+	}
+
+	var payload struct {
+		Error string `json:"error"`
+	}
+
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return errors.ErrBadGateway
+	}
+
+	return errors.FromUpstream(resp.StatusCode, payload.Error)
 }

@@ -4,47 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>HTTP {{.HTTPStatus}}</title>
+    <title>{{.HTTPStatus}} — {{.ErrorTitle}}</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <style>
-        .error-container {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 2rem;
-        }
-        .error-code {
-            font-family: var(--font-mono);
-            font-size: 2.5rem;
-            color: var(--accent-color);
-            margin-bottom: 1rem;
-        }
-        .error-code::after {
-            content: '_';
-            animation: blink 1s step-end infinite;
-        }
-        .error-title {
-            font-family: var(--font-sans);
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--header-color);
-            margin-bottom: 0.5rem;
-        }
-        .error-message {
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-    </style>
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
 </head>
-<body>
-<div class="error-container">
-    <div class="error-code">HTTP {{.HTTPStatus}}</div>
-    <h1 class="error-title">{{.ErrorTitle}}</h1>
-    <p class="error-message">{{.ErrorMessage}}</p>
-</div>
+<body class="error-centered-body">
+<main class="error-centered-container">
+    <h1 class="content-header"><span>{{.ErrorHeader}}::</span> {{.HTTPStatus}}</h1>
+    <div class="styled-block">
+        <span class="key">{{.StatusKey}}</span>: <span class="string">"{{.HTTPStatus}}"</span>,
+        <br>
+        <span class="key">{{.MessageKey}}</span>: <span class="string">"{{.ErrorMessage}}"</span>
+    </div>
+    <div class="error-actions">
+        <a href="/?lang={{.Lang}}" class="modal-btn">{{.HomeLabel}}</a>
+    </div>
+    <nav class="lang-switcher error-lang-switcher" aria-label="{{.LanguageLabel}}">
+        <a href="?lang=pl" lang="pl" hreflang="pl" aria-label="Polski" {{if eq .Lang "pl"}}class="active" aria-current="page"{{end}}>🇵🇱</a>
+        <a href="?lang=en" lang="en" hreflang="en" aria-label="English" {{if eq .Lang "en"}}class="active" aria-current="page"{{end}}>🇬🇧</a>
+    </nav>
+</main>
 </body>
 </html>

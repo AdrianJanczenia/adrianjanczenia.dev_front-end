@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
 )
@@ -31,6 +32,13 @@ func TestClient_GetPageContent(t *testing.T) {
 				w.Write([]byte(`ok`))
 			},
 			wantErr: errors.ErrInternalServerError,
+		},
+		{
+			name: "missing error slug",
+			serverResponse: func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusNotFound)
+			},
+			wantErr: errors.ErrBadGateway,
 		},
 	}
 
@@ -75,6 +83,14 @@ func TestClient_RequestCVToken(t *testing.T) {
 			},
 			wantToken: "",
 			wantErr:   errors.ErrInvalidPassword,
+		},
+		{
+			name: "missing token",
+			serverResponse: func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte(`{}`))
+			},
+			wantToken: "",
+			wantErr:   errors.ErrServiceUnavailable,
 		},
 	}
 
@@ -128,4 +144,25 @@ func TestClient_DownloadCVStream(t *testing.T) {
 			t.Errorf("DownloadCVStream() expected ErrCVExpired, got %v", err)
 		}
 	})
+}
+
+func TestDownloadCVStreamContinuesAfterClientTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/pdf")
+		_, _ = w.Write([]byte("%PDF"))
+		w.(http.Flusher).Flush()
+		time.Sleep(50 * time.Millisecond)
+		_, _ = w.Write([]byte("-complete"))
+	}))
+	defer server.Close()
+	client := NewClient(&http.Client{Timeout: 10 * time.Millisecond}, server.URL)
+	body, _, err := client.DownloadCVStream(context.Background(), "token", "pl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer body.Close()
+	content, err := io.ReadAll(body)
+	if err != nil || string(content) != "%PDF-complete" {
+		t.Fatalf("stream = %q, %v", content, err)
+	}
 }
