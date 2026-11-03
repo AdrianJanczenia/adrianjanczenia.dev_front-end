@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="go" viewBox="0 0 24 24">
+    <path d="M5 10.5C5 6.7 8 4 12 4s7 2.7 7 6.5v5c0 3-2.7 5.5-7 5.5s-7-2.5-7-5.5v-5Z"/>
+    <path d="M5.5 7.5 3.5 6M18.5 7.5 20.5 6M9.5 16.5v2h5v-2"/>
+    <circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/>
+    <path d="m11 14 1 1 1-1"/>
+  </symbol>
+  <symbol id="php" viewBox="0 0 24 24">
+    <ellipse cx="12" cy="12" rx="10" ry="6.5"/>
+    <text x="12" y="14.5" text-anchor="middle" font-family="monospace" font-size="7" font-weight="700" fill="currentColor" stroke="none">PHP</text>
+  </symbol>
+  <symbol id="react" viewBox="0 0 24 24">
+    <ellipse cx="12" cy="12" rx="10" ry="4"/>
+    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/>
+    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/>
+    <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="microservices" viewBox="0 0 24 24">
+    <rect x="2" y="3" width="7" height="6" rx="1"/>
+    <rect x="15" y="3" width="7" height="6" rx="1"/>
+    <rect x="8.5" y="15" width="7" height="6" rx="1"/>
+    <path d="M9 6h6M5.5 9v3h6.5v3m6.5-6v3H12"/>
+  </symbol>
+  <symbol id="distributed" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="3"/>
+    <circle cx="4" cy="5" r="2"/>
+    <circle cx="20" cy="5" r="2"/>
+    <circle cx="4" cy="19" r="2"/>
+    <circle cx="20" cy="19" r="2"/>
+    <path d="m6 6.7 3.7 3.2m8.3-3.2-3.7 3.2M6 17.3l3.7-3.2m8.3 3.2-3.7-3.2"/>
+  </symbol>
+  <symbol id="rest" viewBox="0 0 24 24">
+    <path d="M3 8h17m0 0-4-4m4 4-4 4M21 16H4m0 0 4-4m-4 4 4 4"/>
+  </symbol>
+  <symbol id="rabbitmq" viewBox="0 0 24 24">
+    <path d="M6 12V4.5a1.5 1.5 0 0 1 3 0V9m6 0V4.5a1.5 1.5 0 0 1 3 0V12"/>
+    <path d="M5 11c0-2 2-3 7-3s7 1 7 3v5c0 3-3 5-7 5s-7-2-7-5v-5Z"/>
+    <circle cx="9" cy="13" r=".9" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="13" r=".9" fill="currentColor" stroke="none"/>
+    <path d="m11 17 1 1 1-1"/>
+  </symbol>
+  <symbol id="postgresql" viewBox="0 0 24 24">
+    <path d="M5 10c0-4 3-7 7-7s7 3 7 7v3c0 2-1 3-3 3h-1v3c0 2-1 3-3 3s-3-1-3-3v-5"/>
+    <path d="M5 10H3v4c0 2 1 3 3 3h2m11-7h2v4c0 2-1 3-3 3h-2"/>
+    <circle cx="9" cy="10" r=".8" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="10" r=".8" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="mssql" viewBox="0 0 24 24">
+    <ellipse cx="12" cy="5" rx="8" ry="3"/>
+    <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>
+    <path d="M9 18h6"/>
+  </symbol>
+  <symbol id="redis" viewBox="0 0 24 24">
+    <path d="m12 3 9 4-9 4-9-4 9-4Zm-9 8 9 4 9-4M3 15l9 4 9-4M3 18l9 4 9-4"/>
+    <circle cx="12" cy="7" r="1" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="solr" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 1v4m0 14v4M1 12h4m14 0h4M4.2 4.2 7 7m10 10 2.8 2.8m0-15.6L17 7M7 17l-2.8 2.8"/>
+  </symbol>
+  <symbol id="elasticsearch" viewBox="0 0 24 24">
+    <path d="M5 6c2-2 4-3 7-3s5 1 7 3H5Zm-2 5h18v3H3v-3Zm2 7h14c-2 2-4 3-7 3s-5-1-7-3Z"/>
+  </symbol>
+  <symbol id="unit-tests" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <path d="m7 12 3 3 7-7"/>
+  </symbol>
+  <symbol id="integration-tests" viewBox="0 0 24 24">
+    <rect x="2" y="8" width="8" height="8" rx="1"/>
+    <rect x="14" y="8" width="8" height="8" rx="1"/>
+    <path d="M10 12h4M6 5V3m12 18v-2"/>
+  </symbol>
+  <symbol id="e2e" viewBox="0 0 24 24">
+    <circle cx="4" cy="12" r="2"/>
+    <circle cx="20" cy="12" r="2"/>
+    <path d="M6 12h12m-5-4 4 4-4 4"/>
+  </symbol>
+  <symbol id="codeception" viewBox="0 0 24 24">
+    <rect x="2" y="3" width="20" height="18" rx="2"/>
+    <path d="M17 8a6 6 0 1 0 0 8"/>
+  </symbol>
+  <symbol id="behave" viewBox="0 0 24 24">
+    <path d="M4 4h16v13H9l-5 4V4Z"/>
+    <path d="m8 11 3 3 5-6"/>
+  </symbol>
+  <symbol id="selenium" viewBox="0 0 24 24">
+    <rect x="2" y="3" width="20" height="18" rx="2"/>
+    <path d="M2 8h20m-15 5h6m-6 4h4m4-2 2 2 3-4"/>
+  </symbol>
+  <symbol id="gherkin" viewBox="0 0 24 24">
+    <path d="M8 3c-3 2-4 5-4 9s1 7 4 9m8-18c3 2 4 5 4 9s-1 7-4 9M8 3c2 1 6 1 8 0M8 21c2-1 6-1 8 0"/>
+    <path d="M10 7v1m4 1v1m-4 3v1m4 2v1"/>
+  </symbol>
+  <symbol id="docker" viewBox="0 0 24 24">
+    <path d="M3 14h18c0 4-3 7-9 7-5 0-8-2-9-7Zm3-4h4v4H6v-4Zm5 0h4v4h-4v-4Zm5 0h4v4h-4v-4ZM8 6h4v4H8V6Zm5 0h4v4h-4V6Z"/>
+    <path d="M19 12c1-1 2-1 3-1"/>
+  </symbol>
+  <symbol id="docker-swarm" viewBox="0 0 24 24">
+    <path d="m12 2 5 3v6l-5 3-5-3V5l5-3Zm-7 11 5 3v6l-5-3-4-3v-6l4-3Zm14 0 4 3v6l-4-3-5 3v-6l5-3Z"/>
+  </symbol>
+  <symbol id="ansible" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="m7 17 5-11 5 11-5-4-5 4Zm5-4 2.5 4"/>
+  </symbol>
+  <symbol id="teamcity" viewBox="0 0 24 24">
+    <rect x="2" y="2" width="20" height="20" rx="2"/>
+    <text x="12" y="15" text-anchor="middle" font-family="monospace" font-size="9" font-weight="700" fill="currentColor" stroke="none">TC</text>
+  </symbol>
+  <symbol id="git" viewBox="0 0 24 24">
+    <circle cx="7" cy="4" r="2"/>
+    <circle cx="17" cy="7" r="2"/>
+    <circle cx="7" cy="20" r="2"/>
+    <path d="M7 6v12m0-6c0-3 3-5 8-5"/>
+  </symbol>
+  <symbol id="github-actions" viewBox="0 0 24 24">
+    <circle cx="4" cy="12" r="2"/>
+    <circle cx="20" cy="5" r="2"/>
+    <circle cx="20" cy="19" r="2"/>
+    <path d="M6 12h5c3 0 4-7 7-7m-7 7c3 0 4 7 7 7"/>
+  </symbol>
+  <symbol id="grafana" viewBox="0 0 24 24">
+    <path d="M19 7c-2-3-6-4-9-3-4 1-7 5-6 9s4 7 8 7c3 0 6-2 6-5 0-2-2-4-4-4s-3 1-3 3c0 1 1 2 2 2"/>
+    <path d="m17 4 2-2m1 8 2-1M6 18l-2 2"/>
+  </symbol>
+</svg>

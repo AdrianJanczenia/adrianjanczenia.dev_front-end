@@ -2,11 +2,16 @@ package renderer
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"strings"
+	"os"
+	"path/filepath"
 
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
 	"github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/service/gateway_service"
@@ -25,16 +30,36 @@ func New(templateMap map[string][]string) (Renderer, error) {
 	r := &templateRenderer{
 		templates: make(map[string]*template.Template),
 	}
+	assetURLs, err := versionedStaticAssets(templateMap)
+	if err != nil {
+		return nil, err
+	}
 
 	funcs := template.FuncMap{
-		"join": func(s []string) string {
-			if len(s) == 0 {
-				return ""
+		"staticAssetURL": func(path string) string {
+			if versioned, ok := assetURLs[path]; ok {
+				return versioned
 			}
-			return "\"" + strings.Join(s, "\", \"") + "\""
+			return path
 		},
-		"sub": func(a, b int) int {
-			return a - b
+		"jsonData": func(v any) template.JS {
+			encoded, err := json.Marshal(v)
+			if err != nil {
+				return template.JS("null")
+			}
+			return template.JS(encoded)
+		},
+		"casePath": func(id string) string {
+			switch id {
+			case "migration":
+				return "/experience/monolith-migration"
+			case "checkout":
+				return "/experience/orders-and-payments"
+			case "reservation":
+				return "/experience/reservation-waitlist"
+			default:
+				return "/experience"
+			}
 		},
 	}
 
@@ -43,10 +68,52 @@ func New(templateMap map[string][]string) (Renderer, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		r.templates[name] = t
 	}
 
 	return r, nil
+}
+
+func versionedStaticAssets(templateMap map[string][]string) (map[string]string, error) {
+	urls := make(map[string]string)
+	for _, files := range templateMap {
+		for _, file := range files {
+			if filepath.Base(file) != "base.html" || filepath.Base(filepath.Dir(file)) != "layout" {
+				continue
+			}
+
+			staticDir := filepath.Join(filepath.Dir(filepath.Dir(filepath.Dir(file))), "static")
+			info, err := os.Stat(staticDir)
+			if stderrors.Is(err, os.ErrNotExist) {
+				return urls, nil
+			}
+			if err != nil {
+				return nil, fmt.Errorf("find static assets: %w", err)
+			}
+			if !info.IsDir() {
+				return nil, fmt.Errorf("static asset path is not a directory: %s", staticDir)
+			}
+
+			for _, path := range []string{
+				"/static/css/portfolio.css",
+				"/static/img/technology-icons.svg",
+				"/static/js/site.js",
+				"/static/js/cv.js",
+				"/static/js/explorer.js",
+			} {
+				assetPath := filepath.Join(staticDir, filepath.FromSlash(path[len("/static/"):]))
+				asset, err := os.ReadFile(assetPath)
+				if err != nil {
+					return nil, fmt.Errorf("read static asset %s: %w", path, err)
+				}
+				sum := sha256.Sum256(asset)
+				urls[path] = path + "?v=" + hex.EncodeToString(sum[:8])
+			}
+			return urls, nil
+		}
+	}
+	return urls, nil
 }
 
 func (r *templateRenderer) renderBytes(name string, data any) ([]byte, error) {
@@ -82,13 +149,16 @@ func (r *templateRenderer) RenderError(w http.ResponseWriter, templateName strin
 	if appErr == nil {
 		appErr = errors.ErrInternalServerError
 	}
+
 	if lang != "en" {
 		lang = "pl"
 	}
+
 	fallback := errors.FallbackTranslations[lang]
 	msg := ""
-	if content != nil && content.Translations != nil && content.Translations[appErr.Slug] != "" {
-		msg = content.Translations[appErr.Slug]
+
+	if content != nil && content.UI.Errors[appErr.Slug].Message != "" {
+		msg = content.UI.Errors[appErr.Slug].Message
 	} else {
 		msg = fallback[appErr.Slug]
 	}
@@ -101,9 +171,10 @@ func (r *templateRenderer) RenderError(w http.ResponseWriter, templateName strin
 	if appErr.Slug == errors.ErrRouteNotFound.Slug {
 		titleKey = "error_route_title"
 	}
+
 	title := fallback[titleKey]
-	if content != nil && content.Translations != nil && content.Translations[titleKey] != "" {
-		title = content.Translations[titleKey]
+	if content != nil && content.UI.Errors[appErr.Slug].Title != "" {
+		title = content.UI.Errors[appErr.Slug].Title
 	}
 
 	data := struct {
@@ -136,7 +207,9 @@ func (r *templateRenderer) RenderError(w http.ResponseWriter, templateName strin
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(appErr.HTTPStatus)
+
 	_, _ = w.Write(body)
 }

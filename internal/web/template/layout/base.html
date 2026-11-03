@@ -1,30 +1,106 @@
 {{define "base"}}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{.Lang}}">
 <head>
     {{template "head" .}}
 </head>
-<body id="top">
-
-<div id="global-loader" class="global-loader">
-    <div class="spinner"></div>
-</div>
-
-{{template "mobile_nav" .}}
-
-<div class="container">
-    {{template "sidebar" .}}
-    <main class="main-content">
-        {{template "content" .}}
-    </main>
-</div>
-
-{{template "cv_modal" .}}
-
-<a href="#top" class="back-to-top" aria-label="{{if .Content}}{{index .Content.Translations "back_to_top_label"}}{{else}}Back to top{{end}}">&#8593;</a>
-
-{{template "scripts" .}}
-
+<body id="top" class="portfolio-body">
+    <a class="skip-link" href="#main-content">
+        {{if eq .Lang "pl"}}Przejdź do treści{{else}}Skip to content{{end}}
+    </a>
+    <div id="global-loader" class="global-loader" aria-hidden="true">
+        <div class="spinner"></div>
+    </div>
+    <div class="site-shell">
+        <header class="site-header" data-site-header>
+            <a class="site-brand" href="/?lang={{.Lang}}">
+                Adrian P. Janczenia<span>_</span>
+            </a>
+            <div class="header-actions">
+                <div
+                    class="language-switch"
+                    role="group"
+                    aria-label="{{if eq .Lang "pl"}}Język strony{{else}}Site language{{end}}"
+                >
+                    <a
+                        href="{{.Path}}?lang=pl"
+                        lang="pl"
+                        hreflang="pl"
+                        {{if eq .Lang "pl"}}aria-current="page"{{end}}
+                    >PL</a>
+                    <a
+                        href="{{.Path}}?lang=en"
+                        lang="en"
+                        hreflang="en"
+                        {{if eq .Lang "en"}}aria-current="page"{{end}}
+                    >EN</a>
+                </div>
+                <button
+                    class="menu-toggle"
+                    type="button"
+                    aria-controls="site-nav"
+                    aria-expanded="false"
+                    data-menu-toggle
+                    aria-label="{{.Content.Shared.Navigation.Menu}}"
+                >
+                    <span aria-hidden="true">☰</span>
+                    <span class="menu-toggle-label">{{.Content.Shared.Navigation.Menu}}</span>
+                </button>
+            </div>
+            <nav
+                id="site-nav"
+                class="site-nav"
+                aria-label="{{if eq .Lang "pl"}}Nawigacja portfolio{{else}}Portfolio navigation{{end}}"
+            >
+                <a href="/?lang={{.Lang}}" {{if eq .Page "about"}}aria-current="page"{{end}}>
+                    {{.Content.Shared.Navigation.About}}
+                </a>
+                <a href="/experience?lang={{.Lang}}" {{if eq .Page "experience"}}aria-current="page"{{end}}>
+                    {{.Content.Shared.Navigation.Experience}}
+                </a>
+                <a href="/how-this-site-works?lang={{.Lang}}" {{if eq .Page "how_it_works"}}aria-current="page"{{end}}>
+                    {{.Content.Shared.Navigation.HowItWorks}}
+                </a>
+                <a href="/contact?lang={{.Lang}}" {{if eq .Page "contact"}}aria-current="page"{{end}}>
+                    {{.Content.Shared.Navigation.Contact}}
+                </a>
+                <a href="#cv" class="cv-link nav-cv">
+                    <svg
+                        viewBox="0 0 24 24"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M12 3v12m-4-4 4 4 4-4M4 17v3h16v-3"/>
+                    </svg>
+                    {{.Content.Shared.Navigation.CV}}
+                </a>
+            </nav>
+        </header>
+        <main id="main-content">
+            {{template "content" .}}
+        </main>
+        <footer class="site-footer">
+            <span>© Adrian P. Janczenia</span>
+            <a href="/privacy-policy?lang={{.Lang}}">{{.Content.Shared.Footer.Privacy}}</a>
+        </footer>
+    </div>
+    <div class="copy-toast" id="copy-toast" role="status" aria-live="polite" hidden>
+        {{.Content.UI.EmailCopied}}
+    </div>
+    {{template "cv_modal" .}}
+    <a
+        href="#top"
+        class="back-to-top"
+        aria-label="{{if eq .Lang "pl"}}Wróć na górę{{else}}Back to top{{end}}"
+    >↑</a>
+    {{template "scripts" .}}
+    <script src="{{staticAssetURL "/static/js/site.js"}}" defer></script>
 </body>
 </html>
 {{end}}

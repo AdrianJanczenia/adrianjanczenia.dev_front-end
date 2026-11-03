@@ -33,7 +33,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/privacy-policy" {
 		lang = "en"
 	}
-	if qLang := r.URL.Query().Get("lang"); qLang != "" {
+	if qLang := r.URL.Query().Get("lang"); qLang == "pl" || qLang == "en" {
 		lang = qLang
 	}
 
@@ -57,5 +57,8 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	templateData.IsPrivacyPage = true
+	templateData.Page = "privacy"
+	templateData.Path = r.URL.Path
+
 	h.renderer.Render(w, "privacy", templateData)
 }

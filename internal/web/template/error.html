@@ -1,28 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{.Lang}}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
     <title>{{.HTTPStatus}} — {{.ErrorTitle}}</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{staticAssetURL "/static/css/portfolio.css"}}">
     <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
 </head>
 <body class="error-centered-body">
-<main class="error-centered-container">
-    <h1 class="content-header"><span>{{.ErrorHeader}}::</span> {{.HTTPStatus}}</h1>
-    <div class="styled-block">
-        <span class="key">{{.StatusKey}}</span>: <span class="string">"{{.HTTPStatus}}"</span>,
-        <br>
-        <span class="key">{{.MessageKey}}</span>: <span class="string">"{{.ErrorMessage}}"</span>
-    </div>
-    <div class="error-actions">
-        <a href="/?lang={{.Lang}}" class="modal-btn">{{.HomeLabel}}</a>
-    </div>
-    <nav class="lang-switcher error-lang-switcher" aria-label="{{.LanguageLabel}}">
-        <a href="?lang=pl" lang="pl" hreflang="pl" aria-label="Polski" {{if eq .Lang "pl"}}class="active" aria-current="page"{{end}}>🇵🇱</a>
-        <a href="?lang=en" lang="en" hreflang="en" aria-label="English" {{if eq .Lang "en"}}class="active" aria-current="page"{{end}}>🇬🇧</a>
-    </nav>
-</main>
+    <main class="error-centered-container">
+        <p class="eyebrow">HTTP / {{.HTTPStatus}}</p>
+        <h1>{{.ErrorTitle}}</h1>
+        <div class="styled-block">
+            <p>{{.ErrorMessage}}</p>
+        </div>
+        <div class="error-actions">
+            <a href="/?lang={{.Lang}}" class="modal-btn">{{.HomeLabel}}</a>
+        </div>
+        <nav class="language-switch error-lang-switcher" aria-label="{{.LanguageLabel}}">
+            <a href="?lang=pl" lang="pl" {{if eq .Lang "pl"}}aria-current="page"{{end}}>PL</a>
+            <a href="?lang=en" lang="en" {{if eq .Lang "en"}}aria-current="page"{{end}}>EN</a>
+        </nav>
+    </main>
 </body>
 </html>

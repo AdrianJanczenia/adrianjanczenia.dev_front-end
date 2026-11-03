@@ -1,0 +1,100 @@
+{{define "content"}}
+<section class="page-intro page-section">
+    <p class="eyebrow">{{.Content.Pages.Experience.Intro.Eyebrow}}</p>
+    <h1>{{.Content.Pages.Experience.Intro.Title}}</h1>
+    <p class="lead">{{.Content.Pages.Experience.Intro.Body}}</p>
+</section>
+
+<section class="page-section">
+    <h2 class="section-heading">{{.Content.Pages.Experience.RolesLabel}}</h2>
+    <div class="timeline">
+        {{range .Content.Pages.Experience.Roles.Order}}
+        {{with index $.Content.Pages.Experience.Roles.Items .}}
+        <article class="timeline-item">
+            <span class="timeline-dot" aria-hidden="true"></span>
+            <p class="eyebrow">{{.Period}}</p>
+            <h3>{{.Title}}</h3>
+            <p>{{.Summary}}</p>
+            <ul>
+                {{range .Tasks}}
+                <li>{{.}}</li>
+                {{end}}
+            </ul>
+        </article>
+        {{end}}
+        {{end}}
+    </div>
+</section>
+
+<section class="page-section">
+    <h2 class="section-heading">{{.Content.Pages.Experience.CasesLabel}}</h2>
+    <div class="case-grid">
+        {{range .Content.Pages.Experience.Cases.Order}}
+        {{$caseID := .}}
+        {{with index $.Content.Pages.Experience.Cases.Items .}}
+        <article class="case-card">
+            <p class="eyebrow">{{.Category}}</p>
+            <h3>{{.Title}}</h3>
+            <p>{{.Summary}}</p>
+            <a class="text-link" href="{{casePath $caseID}}?lang={{$.Lang}}">
+                {{$.Content.Pages.Experience.ReadCase}} ↗
+            </a>
+        </article>
+        {{end}}
+        {{end}}
+    </div>
+</section>
+
+<section class="page-section">
+    <h2 class="section-heading">{{.Content.Pages.Experience.TechnologyLabel}}</h2>
+    <div class="tech-grid">
+        {{range .Content.Pages.Experience.TechnologyGroups.Order}}
+        {{$groupID := .}}
+        {{with index $.Content.Pages.Experience.TechnologyGroups.Items .}}
+        <article class="tech-card">
+            <div class="tech-card-heading">
+                <span class="tech-icon" aria-hidden="true">
+                    {{if eq $groupID "backend"}}
+                    <svg viewBox="0 0 32 32">
+                        <path d="m12 9-7 7 7 7m8-14 7 7-7 7m-2-18-4 22"/>
+                    </svg>
+                    {{else if eq $groupID "data"}}
+                    <svg viewBox="0 0 32 32">
+                        <ellipse cx="16" cy="8" rx="11" ry="4"/>
+                        <path d="M5 8v16c0 2.2 4.9 4 11 4s11-1.8 11-4V8M5 16c0 2.2 4.9 4 11 4s11-1.8 11-4"/>
+                    </svg>
+                    {{else if eq $groupID "quality"}}
+                    <svg viewBox="0 0 32 32">
+                        <path
+                            d="M11 11 8 7m13 4 3-4M8 15H4m24 0h-4M8 22H4m24 0h-4
+                               M11 27l-3 3m13-3 3 3M10 14c0-4 2-7 6-7s6 3 6 7v8c0 4-2 7-6 7
+                               s-6-3-6-7v-8Zm0 5h12M16 19v10"
+                        />
+                    </svg>
+                    {{else}}
+                    <svg viewBox="0 0 32 32">
+                        <rect x="3" y="5" width="8" height="7" rx="2"/>
+                        <rect x="21" y="5" width="8" height="7" rx="2"/>
+                        <rect x="12" y="22" width="8" height="7" rx="2"/>
+                        <path d="M11 8h10M16 12v7m0 0-4-3m4 3 4-3"/>
+                    </svg>
+                    {{end}}
+                </span>
+                <h3>{{.Title}}</h3>
+            </div>
+            <div class="tech-items">
+                {{range .Items}}
+                <span class="tech-pill">
+                    <svg class="tech-pill-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="{{staticAssetURL "/static/img/technology-icons.svg"}}#{{.ID}}"></use>
+                    </svg>
+                    {{.Label}}
+                </span>
+                {{end}}
+            </div>
+        </article>
+        {{end}}
+        {{end}}
+    </div>
+</section>
+{{end}}

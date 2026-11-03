@@ -1,8 +1,36 @@
 {{define "head"}}
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>{{if .Content}}{{.Content.Meta.Title}}{{else if .Title}}{{.Title}}{{else}}Adrian P. Janczenia{{end}}</title>
-<link rel="stylesheet" href="/static/css/style.css">
+<meta
+    name="description"
+    content="{{if .CaseID -}}
+        {{(index .Content.Pages.Experience.Cases.Items .CaseID).Summary}}
+    {{- else if eq .Page "experience" -}}
+        {{.Content.Pages.Experience.Intro.Body}}
+    {{- else if eq .Page "how_it_works" -}}
+        {{.Content.Pages.HowItWorks.Body}}
+    {{- else if eq .Page "contact" -}}
+        {{.Content.Pages.Contact.Intro.Body}}
+    {{- else -}}
+        {{.Content.Meta.Description}}
+    {{- end}}"
+>
+<title>
+    {{- if .CaseID -}}
+        {{(index .Content.Pages.Experience.Cases.Items .CaseID).Title}} — Adrian P. Janczenia
+    {{- else if eq .Page "experience" -}}
+        {{.Content.Shared.Navigation.Experience}} — Adrian P. Janczenia
+    {{- else if eq .Page "how_it_works" -}}
+        {{.Content.Shared.Navigation.HowItWorks}} — Adrian P. Janczenia
+    {{- else if eq .Page "contact" -}}
+        {{.Content.Shared.Navigation.Contact}} — Adrian P. Janczenia
+    {{- else if eq .Page "privacy" -}}
+        {{.Content.Pages.Privacy.Title}} — Adrian P. Janczenia
+    {{- else -}}
+        {{.Content.Meta.Title}}
+    {{- end -}}
+</title>
+<link rel="stylesheet" href="{{staticAssetURL "/static/css/portfolio.css"}}">
 <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
 {{end}}

@@ -1,74 +1,54 @@
 {{define "content"}}
-<section id="about" class="content-section">
-    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_about"}}</h2>
-    <div class="styled-block">
-        <p><span class="key">{{index .Content.Translations "profile_key_name"}}:</span> <span class="string">"{{.Content.Profile.Name}}"</span></p>
-        <p><span class="key">{{index .Content.Translations "profile_key_headline"}}:</span> <span class="string">"{{.Content.Profile.Headline}}"</span></p>
-        <br>
-        <p><span class="key">{{index .Content.Translations "profile_key_about"}}:</span> |<span class="multiline-text">{{.Content.Profile.About}}</span></p>
-    </div>
-</section>
-
-<section id="experience" class="content-section">
-    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_experience"}}</h2>
-    <div class="styled-block">
-        {{range .Content.Experience}}
-        <div class="experience-item">
-            <div class="experience-header">
-                <h3>{{.Role}} @ {{.Company}}</h3>
-                <p>{{.Period}}</p>
-            </div>
-            <div class="experience-description">
-                <p><span class="key">{{index $.Content.Translations "experience_key_location"}}:</span> <span class="string">"{{.Location}} | {{.Type}}"</span></p>
-                <br>
-                <p class="string">"{{.Summary}}"</p>
-                <br>
-                <p><span class="key">{{index $.Content.Translations "experience_key_responsibilities"}}:</span> <span class="bracket">[</span></p>
-                {{range .Responsibilities}}
-                <p class="array-item"><span class="string">"{{.}}"</span>,</p>
-                {{end}}
-                <p><span class="bracket">]</span></p>
-                <br>
-                <p><span class="key">{{index $.Content.Translations "experience_key_stack"}}:</span> <span class="bracket">[ </span><span class="string">{{join .SkillsUsed}}</span><span class="bracket"> ]</span></p>
-            </div>
+<section class="hero page-section">
+    <div class="hero-copy">
+        <p class="eyebrow">{{.Content.Pages.About.Hero.Eyebrow}}</p>
+        <h1>{{.Content.Pages.About.Hero.Title}}</h1>
+        <p class="lead">{{.Content.Pages.About.Hero.Body}}</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="/experience?lang={{.Lang}}">
+                {{.Content.Pages.About.Hero.Action}} <span aria-hidden="true">↗</span>
+            </a>
+            <a class="button button-primary" href="/how-this-site-works?lang={{.Lang}}">
+                {{.Content.Shared.Navigation.HowItWorks}} <span aria-hidden="true">↗</span>
+            </a>
         </div>
-        {{end}}
+        <div class="tag-row">
+            {{range .Content.Pages.About.Tags}}
+            <span>{{.}}</span>
+            {{end}}
+        </div>
     </div>
+    <aside class="identity-card">
+        <img
+            class="profile-portrait"
+            src="/static/img/adrian-portrait.jpg"
+            alt="{{if eq .Lang "pl"}}Portret Adriana Janczeni{{else}}Portrait of Adrian Janczenia{{end}}"
+            width="84"
+            height="84"
+        >
+        <div>
+            <p class="eyebrow">{{.Content.Pages.About.Name}}</p>
+            <h2>{{.Content.Pages.About.Role}}</h2>
+            <p>{{.Content.Pages.About.IdentityDetail}}</p>
+        </div>
+    </aside>
 </section>
-
-<section id="skills" class="content-section">
-    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_skills"}}</h2>
-    <div class="styled-block">
-        {{range .Content.Skills}}
-        <p><span class="key">{{.Key}}:</span> <span class="bracket">[ </span><span class="string">{{join .Values}}</span><span class="bracket"> ]</span></p>
-        {{end}}
-    </div>
-</section>
-
-<section id="languages" class="content-section">
-    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_languages"}}</h2>
-    <div class="styled-block">
-        {{range .Content.Languages}}
-        <p><span class="key">{{.Language}}:</span> <span class="string">"{{.Proficiency}}"</span></p>
-        {{end}}
-    </div>
-</section>
-
-<section id="contact" class="content-section">
-    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_contact"}}</h2>
-    <ul class="contact-list">
-        <li>
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-            </svg>
-            <div><span class="key">{{index .Content.Translations "contact_key_linkedin"}}:</span> <a href="https://linkedin.com/in/{{.Content.Contact.Linkedin}}" target="_blank">"/in/{{.Content.Contact.Linkedin}}"</a></div>
-        </li>
-        <li>
-            <svg class="icon" viewBox="0 0 24 24">
-                <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"></path>
-            </svg>
-            <div><span class="key">{{index .Content.Translations "contact_key_email"}}:</span> <a href="mailto:{{.Content.Contact.Email}}">"{{.Content.Contact.Email}}"</a></div>
-        </li>
-    </ul>
+<section class="section-grid page-section">
+    <article class="feature-card">
+        <p class="eyebrow">{{.Content.Pages.About.CareerSnapshot.Eyebrow}}</p>
+        <h2>{{.Content.Pages.About.CareerSnapshot.Title}}</h2>
+        <p>{{.Content.Pages.About.CareerSnapshot.Body}}</p>
+        <a class="text-link" href="/experience?lang={{.Lang}}">
+            {{.Content.Pages.About.CareerSnapshot.Action}} ↗
+        </a>
+    </article>
+    <article class="feature-card">
+        <p class="eyebrow">{{.Content.Pages.About.SiteTeaser.Eyebrow}}</p>
+        <h2>{{.Content.Pages.About.SiteTeaser.Title}}</h2>
+        <p>{{.Content.Pages.About.SiteTeaser.Body}}</p>
+        <a class="text-link" href="/how-this-site-works?lang={{.Lang}}">
+            {{.Content.Pages.About.SiteTeaser.Action}} ↗
+        </a>
+    </article>
 </section>
 {{end}}

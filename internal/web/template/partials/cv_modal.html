@@ -1,27 +1,64 @@
 {{define "cv_modal"}}
-<div id="cv-modal" class="modal-overlay">
+<div
+    id="cv-modal"
+    class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cv-modal-title"
+>
     <div class="modal-window">
-        <button class="modal-close" aria-label="Close">&times;</button>
-        <h3 class="modal-header">{{index .Content.Translations "cv_modal_title"}}</h3>
+        <button class="modal-close" type="button" aria-label="{{.Content.UI.CV.Close}}">×</button>
+        <p class="eyebrow">CV / PDF</p>
+        <h2 id="cv-modal-title" class="modal-header">{{.Content.UI.CV.Title}}</h2>
+        <p class="modal-intro">{{.Content.UI.CV.Intro}}</p>
         <form class="modal-form" id="cv-form">
             <div id="modal-fields">
                 <div class="hp-field">
-                    <input type="text" id="cv-hp-name" name="fullName" tabindex="-1" autocomplete="off">
+                    <label for="cv-hp-name">Name</label>
+                    <input
+                        type="text"
+                        id="cv-hp-name"
+                        name="fullName"
+                        tabindex="-1"
+                        autocomplete="off"
+                    >
                 </div>
-                <input type="password" id="cv-password" class="modal-input" placeholder="{{index .Content.Translations `cv_password_placeholder`}}" required>
-
-                <input type="text" id="cv-captcha" class="modal-input" placeholder="{{index .Content.Translations `cv_captcha_placeholder`}}" required autocomplete="off">
+                <label for="cv-access-code">{{.Content.UI.CV.AccessCodeLabel}}</label>
+                <input
+                    type="password"
+                    id="cv-access-code"
+                    class="modal-input"
+                    required
+                    autocomplete="off"
+                >
+                <label for="cv-captcha">{{.Content.UI.CV.CaptchaLabel}}</label>
+                <input
+                    type="text"
+                    id="cv-captcha"
+                    class="modal-input"
+                    required
+                    autocomplete="off"
+                >
                 <div class="captcha-container">
                     <img id="captcha-img" src="" alt="CAPTCHA">
                 </div>
             </div>
-
             <button type="submit" class="modal-btn">
-                <span class="btn-text">{{index .Content.Translations "btn_get_link"}}</span>
+                <span class="btn-text">{{.Content.UI.CV.Submit}}</span>
                 <span class="spinner"></span>
             </button>
-            <div class="modal-error" id="modal-error"></div>
+            <div class="modal-error" id="modal-error" role="alert"></div>
+            <button type="button" class="modal-retry" id="cv-retry" hidden>
+                {{.Content.UI.CV.Retry}}
+            </button>
         </form>
+        <p class="modal-contact">
+            {{.Content.UI.CV.ContactPrompt}}
+            <a
+                href="mailto:{{.Content.Shared.ContactLinks.Email}}"
+                data-copy-email="{{.Content.Shared.ContactLinks.Email}}"
+            >{{.Content.Shared.ContactLinks.Email}}</a>
+        </p>
     </div>
 </div>
 {{end}}

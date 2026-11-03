@@ -19,6 +19,7 @@ import (
 	handlerGetCVToken "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/get_cv_token"
 	handlerGetPow "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/get_pow"
 	handlerIndexPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/index_page"
+	handlerPortfolioPage "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/portfolio_page"
 	handlerPrivacyPolicy "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/privacy_policy"
 	handlerVerifyCaptcha "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/handler/verify_captcha"
 	appErrors "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/logic/errors"
@@ -56,10 +57,14 @@ func Build(cfg *registry.Config) (*App, error) {
 	}
 
 	templateMap := map[string][]string{
-		"index":    append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "index.html")),
-		"privacy":  append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "privacy.html")),
-		"error":    {filepath.Join(cfg.Templates.Path, "error.html")},
-		"cv_error": {filepath.Join(cfg.Templates.Path, "cv_error.html")},
+		"index":      append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "index.html")),
+		"experience": append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "experience.html")),
+		"case":       append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "case.html")),
+		"explorer":   append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "explorer.html")),
+		"contact":    append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "contact.html")),
+		"privacy":    append(append([]string{layoutBase}, partials...), filepath.Join(cfg.Templates.Path, "privacy.html")),
+		"error":      {filepath.Join(cfg.Templates.Path, "error.html")},
+		"cv_error":   {filepath.Join(cfg.Templates.Path, "cv_error.html")},
 	}
 
 	pageRenderer, err := renderer.New(templateMap)
@@ -75,6 +80,7 @@ func Build(cfg *registry.Config) (*App, error) {
 	contentFetcherTask := taskIndexPage.NewContentFetcherTask(gatewayService)
 	indexPageProcess := processIndexPage.NewProcess(contentFetcherTask)
 	indexPageHandler := handlerIndexPage.NewHandler(indexPageProcess, pageRenderer)
+	portfolioPageHandler := handlerPortfolioPage.NewHandler(indexPageProcess, pageRenderer)
 
 	privacyFetcherTask := taskPrivacyPolicy.NewFetchPrivacyContentTask(gatewayService)
 	privacyProcess := processPrivacyPolicy.NewProcess(privacyFetcherTask)
@@ -123,8 +129,15 @@ func Build(cfg *registry.Config) (*App, error) {
 	mux.Handle("/static/", http.StripPrefix("/static/", staticFs))
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) })
 	mux.HandleFunc("/{$}", indexPageHandler.Handle)
+	mux.HandleFunc("/experience", portfolioPageHandler.Handle("experience", "experience", ""))
+	mux.HandleFunc("/experience/{$}", portfolioPageHandler.Handle("experience", "experience", ""))
+	mux.HandleFunc("/experience/", renderNotFoundPage)
+	mux.HandleFunc("/experience/monolith-migration", portfolioPageHandler.Handle("case", "experience", "migration"))
+	mux.HandleFunc("/experience/orders-and-payments", portfolioPageHandler.Handle("case", "experience", "checkout"))
+	mux.HandleFunc("/experience/reservation-waitlist", portfolioPageHandler.Handle("case", "experience", "reservation"))
+	mux.HandleFunc("/how-this-site-works", portfolioPageHandler.Handle("explorer", "how_it_works", ""))
+	mux.HandleFunc("/contact", portfolioPageHandler.Handle("contact", "contact", ""))
 	mux.HandleFunc("/privacy-policy", privacyHandler.Handle)
-	mux.HandleFunc("/polityka-prywatnosci", privacyHandler.Handle)
 	mux.HandleFunc("/api/cv-token", getCVTokenHandler.Handle)
 	mux.HandleFunc("/api/download/cv", downloadCVHandler.Handle)
 	mux.HandleFunc("/api/pow", getPowHandler.Handle)

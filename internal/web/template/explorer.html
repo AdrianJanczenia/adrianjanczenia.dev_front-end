@@ -1,0 +1,198 @@
+{{define "content"}}
+<div id="request-explorer" lang="{{.Lang}}">
+    <section class="explorer-main">
+        <div class="explorer-kicker">{{.Content.Pages.HowItWorks.Eyebrow}}</div>
+        <h1>{{.Content.Pages.HowItWorks.Title}}</h1>
+        <p class="explorer-lead">{{.Content.Pages.HowItWorks.Body}}</p>
+
+        <div class="explorer-toolbar">
+            <div class="explorer-picker">
+                <span class="explorer-picker-label">
+                    {{index .Content.Pages.HowItWorks.UICopy "viewLabel"}}
+                </span>
+                <div
+                    class="explorer-views"
+                    role="group"
+                    aria-label="{{index .Content.Pages.HowItWorks.UICopy "viewLabel"}}"
+                ></div>
+            </div>
+        </div>
+
+        <div class="explorer-map-header">
+            <div>
+                <span class="explorer-section-label">
+                    {{index .Content.Pages.HowItWorks.UICopy "topology"}}
+                </span>
+                <h2 data-map-title>{{index .Content.Pages.HowItWorks.UICopy "all"}}</h2>
+                <p data-map-description>
+                    {{index .Content.Pages.HowItWorks.UICopy "mapDescription"}}
+                </p>
+            </div>
+            <div class="explorer-map-side">
+                <span class="explorer-click-hint" data-hint aria-hidden="true">
+                    <span class="explorer-cursor">
+                        <svg viewBox="0 0 32 32" aria-hidden="true">
+                            <path d="M7 4v22l6-6 4 8 4-2-4-8 9-1L7 4Z"/>
+                        </svg>
+                    </span>
+                    <span>
+                        {{index .Content.Pages.HowItWorks.UICopy "clickHint"}}
+                    </span>
+                </span>
+                <span class="explorer-map-status" data-map-status>
+                    9 / 9 {{index .Content.Pages.HowItWorks.UICopy "components"}}
+                </span>
+            </div>
+        </div>
+
+        <div class="explorer-flow-options" data-flow-options hidden>
+            <div class="explorer-flow-kind" data-flow-kind>
+                {{index .Content.Pages.HowItWorks.UICopy "mainKind"}}
+            </div>
+            <div
+                class="explorer-choice"
+                role="group"
+                aria-label="{{if eq .Lang "pl"}}Warunek żądania{{else}}Request condition{{end}}"
+            ></div>
+            <p class="explorer-branch-note" data-variant-explain></p>
+        </div>
+
+        <div class="explorer-mobile-run" data-mobile-run hidden>
+            <div class="explorer-run-heading">
+                <span class="explorer-section-label" data-mobile-progress></span>
+                <p data-mobile-result aria-live="polite"></p>
+            </div>
+            <div class="explorer-nonce" data-nonce hidden>
+                <span class="explorer-nonce-label">SHA-256 · demo-seed</span>
+                <span class="explorer-nonce-value">nonce <b data-nonce-try>0</b></span>
+                <code data-nonce-hash>················</code>
+                <span class="explorer-nonce-track">
+                    <span data-nonce-progress></span>
+                </span>
+            </div>
+            <div class="explorer-mobile-actions">
+                <button type="button" data-mobile-next></button>
+                <button type="button" data-mobile-pause></button>
+                <button type="button" data-mobile-reset></button>
+            </div>
+        </div>
+
+        <div
+            class="explorer-map"
+            role="group"
+            aria-label="{{if eq .Lang "pl"}}Mapa usług portfolio{{else}}Portfolio service map{{end}}"
+        >
+            <svg aria-hidden="true"></svg>
+            <button type="button" class="explorer-node" data-id="browser" aria-pressed="false">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "nodeBrowserTitle"}}</strong>
+                <small>{{index .Content.Pages.HowItWorks.UICopy "nodeBrowserDetail"}}</small>
+            </button>
+            <button type="button" class="explorer-node" data-id="caddy" aria-pressed="false">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "nodeCaddyTitle"}}</strong>
+                <small>{{index .Content.Pages.HowItWorks.UICopy "nodeCaddyDetail"}}</small>
+            </button>
+            <button type="button" class="explorer-node" data-id="front" aria-pressed="false">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "nodeFrontTitle"}}</strong>
+                <small>{{index .Content.Pages.HowItWorks.UICopy "nodeFrontDetail"}}</small>
+            </button>
+            <button type="button" class="explorer-node" data-id="gateway" aria-pressed="false">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "nodeGatewayTitle"}}</strong>
+                <small>{{index .Content.Pages.HowItWorks.UICopy "nodeGatewayDetail"}}</small>
+            </button>
+            <button type="button" class="explorer-node" data-id="rabbit" aria-pressed="false">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "nodeRabbitTitle"}}</strong>
+                <small>{{index .Content.Pages.HowItWorks.UICopy "nodeRabbitDetail"}}</small>
+            </button>
+            <button type="button" class="explorer-node" data-id="content" aria-pressed="false">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "nodeContentTitle"}}</strong>
+                <small>{{index .Content.Pages.HowItWorks.UICopy "nodeContentDetail"}}</small>
+            </button>
+            <button type="button" class="explorer-node" data-id="cache" aria-pressed="false">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "nodeCacheTitle"}}</strong>
+                <small>{{index .Content.Pages.HowItWorks.UICopy "nodeCacheDetail"}}</small>
+            </button>
+            <button type="button" class="explorer-node" data-id="captcha" aria-pressed="false">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "nodeCaptchaTitle"}}</strong>
+                <small>{{index .Content.Pages.HowItWorks.UICopy "nodeCaptchaDetail"}}</small>
+            </button>
+            <button type="button" class="explorer-node" data-id="redis" aria-pressed="false">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "nodeRedisTitle"}}</strong>
+                <small>{{index .Content.Pages.HowItWorks.UICopy "nodeRedisDetail"}}</small>
+            </button>
+            <span class="explorer-packet" hidden></span>
+        </div>
+
+        <div class="explorer-component-detail" aria-live="polite">
+            <span class="explorer-section-label" data-component-label>
+                {{index .Content.Pages.HowItWorks.UICopy "discover"}}
+            </span>
+            <strong data-component-title>
+                {{index .Content.Pages.HowItWorks.UICopy "discoverTitle"}}
+            </strong>
+            <p data-component-description>
+                {{index .Content.Pages.HowItWorks.UICopy "discoverText"}}
+            </p>
+        </div>
+
+        <section
+            class="explorer-work"
+            aria-label="{{if eq .Lang "pl"}}Przebieg endpointu{{else}}Endpoint flow{{end}}"
+            hidden
+        >
+            <div class="explorer-work-top">
+                <div>
+                    <span class="explorer-section-label">
+                        {{index .Content.Pages.HowItWorks.UICopy "requestPath"}}
+                    </span>
+                    <h3 data-flow-title></h3>
+                    <small class="explorer-endpoint-code" data-flow-endpoint></small>
+                </div>
+                <span class="explorer-map-status" data-progress></span>
+            </div>
+            <div
+                class="explorer-stepper"
+                role="group"
+                aria-label="{{if eq .Lang "pl"}}Kroki żądania{{else}}Request steps{{end}}"
+            ></div>
+            <div class="explorer-feedback" aria-live="polite">
+                <strong>{{index .Content.Pages.HowItWorks.UICopy "now"}}</strong>
+                <span data-feedback></span>
+            </div>
+            <div class="explorer-details">
+                <div class="explorer-detail-text">
+                    <span class="explorer-section-label">
+                        {{index .Content.Pages.HowItWorks.UICopy "result"}}
+                    </span>
+                    <h4 data-detail-title></h4>
+                    <p data-detail-description></p>
+                </div>
+                <div class="explorer-code">
+                    <section>
+                        <small>REQUEST</small>
+                        <pre data-code="request"></pre>
+                    </section>
+                    <section>
+                        <small>RESPONSE</small>
+                        <pre data-code="response"></pre>
+                    </section>
+                    <section>
+                        <small>
+                            {{index .Content.Pages.HowItWorks.UICopy "state"}}
+                        </small>
+                        <pre data-code="state"></pre>
+                    </section>
+                    <section>
+                        <small>
+                            {{index .Content.Pages.HowItWorks.UICopy "decision"}}
+                        </small>
+                        <pre data-code="decision"></pre>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </section>
+</div>
+
+<script type="application/json" id="explorer-copy">{{jsonData .Content.Pages.HowItWorks}}</script>
+<script src="{{staticAssetURL "/static/js/explorer.js"}}" defer></script>
+{{end}}

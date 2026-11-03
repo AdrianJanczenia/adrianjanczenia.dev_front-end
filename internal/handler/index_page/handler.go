@@ -51,6 +51,9 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	templateData.Page = "about"
+	templateData.Path = "/"
+
 	h.renderer.Render(w, "index", templateData)
 }
 

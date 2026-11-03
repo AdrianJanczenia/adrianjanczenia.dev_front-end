@@ -21,9 +21,17 @@ func TestClient_GetPageContent(t *testing.T) {
 			name: "successful response",
 			serverResponse: func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				w.Write([]byte(`{"meta":{"title":"Test"}}`))
+				w.Write([]byte(`{"schema_version":2,"meta":{"title":"Test","locale":"pl"},"shared":{"navigation":{"about":"O mnie"}},"pages":{"about":{"hero":{"title":"Backend"}}}}`))
 			},
 			wantErr: nil,
+		},
+		{
+			name: "old content schema",
+			serverResponse: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.Write([]byte(`{"meta":{"title":"Test"}}`))
+			},
+			wantErr: errors.ErrBadGateway,
 		},
 		{
 			name: "invalid content type",

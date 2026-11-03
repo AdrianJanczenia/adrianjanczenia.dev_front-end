@@ -1,0 +1,36 @@
+{{define "content"}}
+{{$case := index .Content.Pages.Experience.Cases.Items .CaseID}}
+<article class="case-detail page-section">
+    <a class="text-link" href="/experience?lang={{.Lang}}">
+        ← {{.Content.Pages.Experience.Back}}
+    </a>
+    <p class="eyebrow case-kicker">{{$case.Category}}</p>
+    <h1>{{$case.Title}}</h1>
+    <p class="lead">{{$case.Summary}}</p>
+    <div class="case-detail-grid">
+        <div class="case-prose">
+            <section>
+                <h2>{{.Content.Pages.Experience.ProblemLabel}}</h2>
+                <p>{{$case.Problem}}</p>
+            </section>
+            <section>
+                <h2>{{.Content.Pages.Experience.ContributionLabel}}</h2>
+                <ul>
+                    {{range $case.Contribution}}
+                    <li>{{.}}</li>
+                    {{end}}
+                </ul>
+            </section>
+            <section>
+                <h2>{{.Content.Pages.Experience.ResultLabel}}</h2>
+                <p>{{$case.Result}}</p>
+                <blockquote>{{$case.Takeaway}}</blockquote>
+            </section>
+        </div>
+        <aside class="case-side">
+            <p class="eyebrow">{{.Content.Pages.Experience.TechnologyLabel}}</p>
+            <p>{{range $index, $technology := $case.TechContext}}{{if $index}} · {{end}}{{$technology}}{{end}}</p>
+        </aside>
+    </div>
+</article>
+{{end}}

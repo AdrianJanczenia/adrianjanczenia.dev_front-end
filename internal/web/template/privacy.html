@@ -1,20 +1,17 @@
 {{define "content"}}
-<section class="privacy-container">
-    <h2 class="content-header"><span>GET</span> /{{index .Content.Translations "header_privacy"}}</h2>
-    <div class="styled-block privacy-content">
-        {{range .Content.PrivacyPolicy.Sections}}
-        <div class="privacy-section">
-            <h3 class="key">{{.Header}}</h3>
-            <div class="privacy-items">
-                {{range .Items}}
-                <div class="privacy-item">
-                    {{if .Label}}<span class="key">{{.Label}}</span>{{end}}
-                    <p class="string">{{.Text}}</p>
-                </div>
-                {{end}}
-            </div>
+<article class="privacy-page page-section">
+    <p class="eyebrow">{{.Content.Shared.Footer.Privacy}}</p>
+    <h1>{{.Content.Pages.Privacy.Title}}</h1>
+    {{range .Content.Pages.Privacy.Sections}}
+    <section>
+        <h2>{{.Header}}</h2>
+        {{range .Items}}
+        <div class="privacy-item">
+            {{if .Label}}<h3>{{.Label}}</h3>{{end}}
+            <p>{{.Text}}</p>
         </div>
         {{end}}
-    </div>
-</section>
+    </section>
+    {{end}}
+</article>
 {{end}}

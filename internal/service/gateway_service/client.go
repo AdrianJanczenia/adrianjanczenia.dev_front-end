@@ -62,6 +62,10 @@ func (c *Client) GetPageContent(ctx context.Context, lang string) (*PageContent,
 		return nil, errors.ErrInternalServerError
 	}
 
+	if pageContent.SchemaVersion != 2 || pageContent.Meta.Locale != lang || pageContent.Pages.About.Hero.Title == "" || pageContent.Shared.Navigation.About == "" {
+		return nil, errors.ErrBadGateway
+	}
+
 	return &pageContent, nil
 }
 

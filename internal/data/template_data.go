@@ -5,5 +5,8 @@ import "github.com/AdrianJanczenia/adrianjanczenia.dev_front-end/internal/servic
 type TemplateData struct {
 	Lang          string
 	IsPrivacyPage bool
+	Page          string
+	CaseID        string
+	Path          string
 	Content       *gateway_service.PageContent
 }
