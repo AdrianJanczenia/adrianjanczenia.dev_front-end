@@ -64,7 +64,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	defer stream.Close()
 
 	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Content-Disposition", "attachment; filename=\"cv_adrian_janczenia.pdf\"")
+	w.Header().Set("Content-Disposition", "inline; filename=\"cv_adrian_janczenia.pdf\"")
 
 	_ = http.NewResponseController(w).SetWriteDeadline(time.Time{})
 	if _, err := io.Copy(w, stream); err != nil {

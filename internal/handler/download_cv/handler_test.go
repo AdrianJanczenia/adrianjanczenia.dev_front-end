@@ -77,8 +77,8 @@ func TestHandler_DownloadCV(t *testing.T) {
 		if w.Header().Get("Content-Type") != "application/pdf" {
 			t.Errorf("expected application/pdf, got %s", w.Header().Get("Content-Type"))
 		}
-		if got := w.Header().Get("Content-Disposition"); got != "attachment; filename=\"cv_adrian_janczenia.pdf\"" {
-			t.Errorf("expected PDF download, got Content-Disposition %q", got)
+		if got := w.Header().Get("Content-Disposition"); got != "inline; filename=\"cv_adrian_janczenia.pdf\"" {
+			t.Errorf("expected inline PDF, got Content-Disposition %q", got)
 		}
 		if w.Body.String() != "pdf data" {
 			t.Errorf("expected pdf data, got %s", w.Body.String())
